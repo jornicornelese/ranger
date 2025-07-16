@@ -3,6 +3,7 @@
 namespace Laravel\Ranger\Resolvers\Expr;
 
 use Laravel\Ranger\Resolvers\AbstractResolver;
+use Laravel\Ranger\Types\ArrayType;
 use Laravel\Ranger\Types\Contracts\Type as ResultContract;
 use Laravel\Ranger\Types\Type as RangerType;
 use PhpParser\Node;
@@ -13,17 +14,19 @@ class FuncCall extends AbstractResolver
     {
         if ($node->name->toString() === 'array_merge') {
             $arrays = collect($node->args)->map($this->from(...));
-            $finalArray = [];
+            $finalArray = collect();
 
             foreach ($arrays as $array) {
-                if (is_array($array)) {
-                    $finalArray = array_merge($finalArray, $array);
+                if ($array instanceof ArrayType) {
+                    $finalArray = $finalArray->merge($array->value);
                 } else {
-                    $finalArray['[key: string]'] = 'mixed';
+                    dd('Unsupported array_merge argument type', $array);
                 }
+
+                // $finalArray['[key: string]'] = 'mixed';
             }
 
-            if (array_is_list($finalArray)) {
+            if ($finalArray->keys()->every(fn ($key) => is_int($key))) {
                 dd('is list', $finalArray);
 
                 return RangerType::array([]);

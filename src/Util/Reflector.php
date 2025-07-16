@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use Laravel\Ranger\Collectors\Models as CollectorsModels;
 use Laravel\Ranger\Types\ClassType;
 use Laravel\Ranger\Types\Contracts\Type as ResultContract;
+use Laravel\Ranger\Types\MixedType;
 use Laravel\Ranger\Types\Type as RangerType;
 use PhpParser\Node;
 use PhpParser\Node\Expr\CallLike;
@@ -108,12 +109,17 @@ class Reflector
             // $this->parser->nodeFinder()->findFirst($this->parser->parse($method), fn($n) => $n instanceof MethodCall && $n->name instanceof Identifier && $n->name->toString() === $method)
             $returnType = $this->docBlockParser->parseReturn($method->getDocComment());
 
+            // TODO: This is a collection now, not a string or array
             if ($returnType === '$this') {
                 return $class;
             }
 
             if ($returnType) {
-                return RangerType::union(...$returnType);
+                $isMixed = $returnType->count() === 1 && $returnType->first() instanceof MixedType;
+
+                if (! $isMixed) {
+                    return RangerType::union(...$returnType);
+                }
             }
         }
 
@@ -202,7 +208,7 @@ class Reflector
         };
 
         if (is_string($class)) {
-            $model = app(CollectorsModels::class)->getCollection()->first(fn ($m) => $m->name === $class);
+            $model = app(CollectorsModels::class)->get($class);
 
             if ($model) {
                 return $model->getAttributes()[$property] ?? $model->getRelations()[$property] ?? null;

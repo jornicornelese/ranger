@@ -45,6 +45,11 @@ class Models extends Collector
         return $this->modelComponents;
     }
 
+    public function get(string $model): ?ModelComponent
+    {
+        return $this->getCollection()->first(fn (ModelComponent $component) => $component->name === $model);
+    }
+
     protected function mapToModel(string $model): void
     {
         $reflection = new ReflectionClass($model);

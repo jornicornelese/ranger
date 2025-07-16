@@ -19,17 +19,8 @@ trait ResolvesProperties
         $this->context['property_chain'] ??= [];
         $this->context['property_chain'][] = $node->name->name;
 
-        if ($node->var instanceof Node\Expr\Variable) {
-            return $this->resolvePropertyFromVariable($node->var);
-        }
-
-        return $this->from($node->var);
-    }
-
-    protected function resolvePropertyFromVariable(Node\Expr\Variable $node)
-    {
         // We've reached the root, figure out the type of the variable and work backwards
-        $variableType = $this->from($node);
+        $variableType = $this->from($node->var);
 
         $chain = array_reverse($this->context['property_chain']);
 

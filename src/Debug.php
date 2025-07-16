@@ -2,6 +2,7 @@
 
 namespace Laravel\Ranger;
 
+use PhpParser\NodeAbstract;
 use Throwable;
 
 use function Laravel\Prompts\info;
@@ -53,7 +54,16 @@ class Debug
     {
         if (self::$dump && self::$currentlyInterested) {
             $trace = debug_backtrace(limit: 1);
-            dump($trace[0]['file'].':'.$trace[0]['line'], ...$args);
+
+            dump($trace[0]['file'].':'.$trace[0]['line'], ...array_map(function ($a) {
+                if ($a instanceof NodeAbstract) {
+                    $a->setAttribute('parent', null);
+                }
+
+                return $a;
+            }, $args));
+
+            echo PHP_EOL.str_repeat('-', 80).PHP_EOL.PHP_EOL;
         }
     }
 
@@ -61,7 +71,14 @@ class Debug
     {
         if (self::$dump && self::$currentlyInterested) {
             $trace = debug_backtrace(limit: 1);
-            dd($trace[0]['file'].':'.$trace[0]['line'], ...$args);
+
+            dd($trace[0]['file'].':'.$trace[0]['line'], ...array_map(function ($a) {
+                if ($a instanceof NodeAbstract) {
+                    $a->setAttribute('parent', null);
+                }
+
+                return $a;
+            }, $args));
         }
     }
 }

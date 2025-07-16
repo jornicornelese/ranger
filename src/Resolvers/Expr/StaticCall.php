@@ -14,8 +14,16 @@ class StaticCall extends AbstractResolver
     {
         $stanType = $this->getStanType($node);
 
-        if ($stanType instanceof ClassType && $stanType->value === 'Inertia\\LazyProp') {
-            return RangerType::from($this->from($node->getArgs()[0]))->optional();
+        if ($stanType instanceof ClassType) {
+            $return = match ($stanType->value) {
+                'Inertia\\LazyProp' => RangerType::from($this->from($node->getArgs()[0]))->optional(),
+                'Inertia\\AlwaysProp' => RangerType::from($this->from($node->getArgs()[0])),
+                default => null,
+            };
+
+            if ($return) {
+                return $return;
+            }
         }
 
         if ($stanType !== null) {
@@ -25,8 +33,22 @@ class StaticCall extends AbstractResolver
         $varType = $this->from($node->class);
 
         if ($varType instanceof ClassType || (is_string($varType) && class_exists($varType))) {
-            $varType = $varType instanceof ClassType ? $varType->resolved() : $varType;
-            $returnType = $this->reflector->methodReturnType($varType, $node->name->name, $node);
+            $classVarType = $varType instanceof ClassType ? $varType->resolved() : $varType;
+
+            if ($classVarType !== $varType) {
+                $reflection = $this->reflector->reflectClass($classVarType);
+
+                $parsed = $this->parser->parse($reflection);
+
+                $methodNode = $this->parser->nodeFinder()->findFirst(
+                    $parsed,
+                    static fn (Node $n) => $n instanceof Node\Stmt\ClassMethod && $n->name->name === $node->name->name,
+                );
+
+                return $this->from($methodNode);
+            }
+
+            $returnType = $this->reflector->methodReturnType($classVarType, $node->name->name, $node);
 
             if ($returnType) {
                 return $returnType;

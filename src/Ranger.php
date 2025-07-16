@@ -45,6 +45,11 @@ class Ranger
         $this->addCallback(Collectors\BroadcastEvents::class, $callback);
     }
 
+    public function onInertiaSharedData(callable $callback): void
+    {
+        $this->addCallback(Collectors\InertiaSharedData::class, $callback);
+    }
+
     public function onBroadcastEvents(callable $callback): void
     {
         $this->addCollectionCallback(Collectors\BroadcastEvents::class, $callback);
@@ -59,12 +64,6 @@ class Ranger
     {
         $this->addCollectionCallback(Collectors\BroadcastChannels::class, $callback);
     }
-
-    // TODO: Is this just part of routes? Or is it a separate thing?
-    // public function onFormRequest(callable $callback): void
-    // {
-    //     $this->addCallback(Collectors\FormRequests::class, $callback);
-    // }
 
     public function walk()
     {

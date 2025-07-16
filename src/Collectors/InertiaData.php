@@ -76,7 +76,13 @@ class InertiaData
         $renders = [];
 
         foreach ($nodes as $node) {
-            if (! isset($node->args[1]) || ! $node->args[1]->value instanceof Node\Expr\Array_) {
+            if (! isset($node->args[1])) {
+                $renders[] = new InertiaResponse($node->args[0]->value->value, []);
+
+                continue;
+            }
+
+            if (! $node->args[1]->value instanceof Node\Expr\Array_) {
                 continue;
             }
 

@@ -17,6 +17,8 @@ class ClassType extends AbstractType implements Contracts\Type
         $reflection = new ReflectionClass($this->value);
 
         if ($reflection->isSubclassOf(Facade::class)) {
+            dd('oh hye', $this->value::getFacadeRoot());
+
             return get_class($this->value::getFacadeRoot());
         }
 

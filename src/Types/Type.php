@@ -57,8 +57,22 @@ class Type
         }
 
         if (is_string($value)) {
+            // TODO: Handle more types
+            // - `array`
+            // - `callable`
+            // - `bool`
+            // - `float`
+            // - `int`
+            // - `string`
+            // - `iterable`
+            // - `object`
+            // - `mixed`
             if ($value === 'array') {
                 return self::array([]);
+            }
+
+            if ($value === 'object') {
+                return self::arrayShape(self::mixed(), self::mixed());
             }
 
             if (method_exists(self::class, $value)) {

@@ -2,8 +2,9 @@
 
 namespace Laravel\Ranger\Resolvers\Expr;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Laravel\Ranger\Debug;
+use Laravel\Ranger\Collectors\Models;
 use Laravel\Ranger\Resolvers\AbstractResolver;
 use Laravel\Ranger\Types\ClassType;
 use Laravel\Ranger\Types\Contracts\Type as ResultContract;
@@ -16,8 +17,6 @@ class MethodCall extends AbstractResolver
 {
     public function resolve(Node\Expr\MethodCall $node): ResultContract
     {
-        // Debug::$currentlyInterested = $node->name->name === 'all';
-
         $stanType = $this->getStanType($node);
 
         if ($stanType !== null) {
@@ -27,7 +26,27 @@ class MethodCall extends AbstractResolver
         $varType = $this->from($node->var);
 
         if ($varType instanceof ClassType) {
+            // TODO: Boo, why are we having trouble resolving this
+            if ($node->name->name === 'user' && $varType->resolved() === Request::class) {
+                $model = app(Models::class)->get('App\\Models\\User');
+
+                if ($model) {
+                    return RangerType::string($model->name);
+                }
+            }
+
             $returnType = $this->reflector->methodReturnType($varType, $node->name->name, $node);
+
+            // $reflection = $this->reflector->reflectClass($varType->value);
+
+            // $parsed = $this->parser->parse($reflection);
+
+            // $methodNode = $this->parser->nodeFinder()->findFirst(
+            //     $parsed,
+            //     static fn(Node $n) => $n instanceof Node\Stmt\ClassMethod && $n->name->name === $node->name->name,
+            // );
+
+            // return $this->from($methodNode);
 
             if ($returnType) {
                 return $returnType;
