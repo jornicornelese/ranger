@@ -15,6 +15,8 @@ use Laravel\Ranger\Collectors\Routes;
 use Laravel\Ranger\Util\DocBlockParser;
 use Laravel\Ranger\Util\DocBlockTypeResolver;
 use Laravel\Ranger\Util\Parser;
+use Laravel\Ranger\Util\Reflector;
+use Laravel\Ranger\Util\Stan;
 use Phar;
 use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\ScopeFactory;
@@ -31,12 +33,14 @@ class RangerServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
         $this->app->singleton(Enums::class);
         $this->app->singleton(Models::class);
         $this->app->singleton(Routes::class);
         $this->app->singleton(BroadcastChannels::class);
         $this->app->singleton(BroadcastEvents::class);
+        $this->app->singleton(Reflector::class);
+        $this->app->singleton(Parser::class);
+        $this->app->singleton(Stan::class);
 
         // TODO: Make this configurable
         // if (app()->environment('testing')) {

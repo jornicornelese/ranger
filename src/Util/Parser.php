@@ -24,6 +24,8 @@ class Parser
 
     protected NodeTraverser $nodeTraverser;
 
+    protected array $cache = [];
+
     public function __construct(
         protected Standard $prettyPrinter,
     ) {
@@ -34,6 +36,17 @@ class Parser
     }
 
     public function parse(string|ReflectionClass|ReflectionFunction|ReflectionMethod|SplFileInfo $code): array
+    {
+        $key = match (true) {
+            is_string($code) => $code,
+            $code instanceof SplFileInfo => $code->getPathname(),
+            default => $code->getFileName(),
+        };
+
+        return $this->cache[$key] ??= $this->parseInternal($code);
+    }
+
+    protected function parseInternal(string|ReflectionClass|ReflectionFunction|ReflectionMethod|SplFileInfo $code): array
     {
         try {
             $code = match (true) {

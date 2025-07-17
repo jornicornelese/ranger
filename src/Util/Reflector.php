@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Laravel\Ranger\Collectors\Models as CollectorsModels;
 use Laravel\Ranger\Types\ClassType;
-use Laravel\Ranger\Types\Contracts\Type as ResultContract;
+use Laravel\Ranger\Types\Contracts\Type as TypeContract;
 use Laravel\Ranger\Types\MixedType;
 use Laravel\Ranger\Types\Type as RangerType;
 use PhpParser\Node;
@@ -25,6 +25,14 @@ use Throwable;
 
 class Reflector
 {
+    protected array $classCache = [];
+
+    protected array $methodCache = [];
+
+    protected array $methodParamTypeCache = [];
+
+    protected array $propertyCache = [];
+
     public function __construct(
         protected DocBlockParser $docBlockParser,
         protected Parser $parser,
@@ -33,7 +41,7 @@ class Reflector
         //
     }
 
-    public function functionReturnType(string|ReflectionFunction $func, ?CallLike $node = null): string|array|ResultContract|null
+    public function functionReturnType(string|ReflectionFunction $func, ?CallLike $node = null): string|array|TypeContract|null
     {
         $reflection = is_string($func) ? new ReflectionFunction($func) : $func;
 
@@ -57,14 +65,22 @@ class Reflector
         return null;
     }
 
-    public function methodReturnType(string|ReflectionClass|ClassType $class, string $method, ?CallLike $methodNode = null): ?ResultContract
+    public function methodReturnType(string|ReflectionClass|ClassType $class, string $method, ?CallLike $methodNode = null): ?TypeContract
     {
+        $className = match (true) {
+            $class instanceof ReflectionClass => $class->getName(),
+            $class instanceof ClassType => $class->value,
+            default => $class,
+        };
+
+        return $this->methodCache[$className.'::'.$method] ??= $this->resolveMethodReturnType($className, $method, $methodNode);
+    }
+
+    protected function resolveMethodReturnType(string $className, string $method, ?CallLike $methodNode = null): ?TypeContract
+    {
+
         try {
-            $className = match (true) {
-                $class instanceof ReflectionClass => $class->getName(),
-                $class instanceof ClassType => $class->value,
-                default => $class,
-            };
+            $method = $this->reflectMethod($className, $method);
 
             // $reflectedClass = $this->reflectClass($className);
             // $parsed = $this->parser->parse($reflectedClass);
@@ -98,8 +114,6 @@ class Reflector
             //     fn($n) => $this->stan->getType($n),
             //     $returnNodes,
             // ));
-
-            $method = $this->reflectMethod($className, $method);
         } catch (Throwable $e) {
             return null;
         }
@@ -111,7 +125,7 @@ class Reflector
 
             // TODO: This is a collection now, not a string or array
             if ($returnType === '$this') {
-                return $class;
+                return RangerType::string($className);
             }
 
             if ($returnType) {
@@ -136,7 +150,12 @@ class Reflector
             return $class;
         }
 
-        if (is_string($class) && interface_exists($class)) {
+        return $this->classCache[$class] ??= $this->resolveClass($class);
+    }
+
+    protected function resolveClass(string $class): ReflectionClass
+    {
+        if (interface_exists($class)) {
             $bindings = app()->getBindings();
             $aliasClass = ltrim($class, '\\');
             $isAlias = app()->isAlias($aliasClass);
@@ -168,6 +187,11 @@ class Reflector
 
     public function methodParamType(string $class, string $method, string $paramName)
     {
+        return $this->methodParamTypeCache[$class.'::'.$method.'::'.$paramName] ??= $this->resolveMethodParamType($class, $method, $paramName);
+    }
+
+    protected function resolveMethodParamType(string $class, string $method, string $paramName): ?TypeContract
+    {
         try {
             $reflection = $this->reflectMethod($class, $method);
         } catch (Throwable $e) {
@@ -184,7 +208,7 @@ class Reflector
         return null;
     }
 
-    public function returnType(ReflectionNamedType|ReflectionUnionType $returnType): ?ResultContract
+    public function returnType(ReflectionNamedType|ReflectionUnionType $returnType): ?TypeContract
     {
         if ($returnType instanceof ReflectionNamedType) {
             return RangerType::from($returnType->getName());
@@ -200,13 +224,22 @@ class Reflector
         return null;
     }
 
-    public function propertyType(string|ReflectionClass|ClassType $class, string $property): ?ResultContract
+    public function propertyType(string|ReflectionClass|ClassType $class, string $property): ?TypeContract
     {
         $class = match (true) {
             $class instanceof ClassType => $class->value,
             default => $class,
         };
 
+        if (! is_string($class)) {
+            dd($class, 'not a string!');
+        }
+
+        return $this->propertyCache[$class.'::'.$property] ??= $this->resolvePropertyType($class, $property);
+    }
+
+    protected function resolvePropertyType(string $class, string $property): ?TypeContract
+    {
         if (is_string($class)) {
             $model = app(CollectorsModels::class)->get($class);
 
