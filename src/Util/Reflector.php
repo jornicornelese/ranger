@@ -78,9 +78,8 @@ class Reflector
 
     protected function resolveMethodReturnType(string $className, string $method, ?CallLike $methodNode = null): ?TypeContract
     {
-
         try {
-            $method = $this->reflectMethod($className, $method);
+            $methodReflection = $this->reflectMethod($className, $method);
 
             // $reflectedClass = $this->reflectClass($className);
             // $parsed = $this->parser->parse($reflectedClass);
@@ -118,10 +117,10 @@ class Reflector
             return null;
         }
 
-        if ($method->getDocComment()) {
+        if ($methodReflection->getDocComment()) {
             // Let's assume the docblock comment is more specific than the return type
-            // $this->parser->nodeFinder()->findFirst($this->parser->parse($method), fn($n) => $n instanceof MethodCall && $n->name instanceof Identifier && $n->name->toString() === $method)
-            $returnType = $this->docBlockParser->parseReturn($method->getDocComment());
+            // $this->parser->nodeFinder()->findFirst($this->parser->parse($methodReflection), fn($n) => $n instanceof MethodCall && $n->name instanceof Identifier && $n->name->toString() === $methodReflection)
+            $returnType = $this->docBlockParser->parseReturn($methodReflection->getDocComment());
 
             // TODO: This is a collection now, not a string or array
             if ($returnType === '$this') {
@@ -137,8 +136,8 @@ class Reflector
             }
         }
 
-        if ($method->hasReturnType()) {
-            return $this->returnType($method->getReturnType());
+        if ($methodReflection->hasReturnType()) {
+            return $this->returnType($methodReflection->getReturnType());
         }
 
         return null;

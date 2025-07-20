@@ -13,6 +13,7 @@ use Laravel\Ranger\Components\Model as ModelComponent;
 use Laravel\Ranger\Types\Contracts\Type as ResultContract;
 use Laravel\Ranger\Types\Type;
 use Laravel\Ranger\Util\Arrayable as UtilArrayable;
+use Laravel\Ranger\Util\Reflector;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionUnionType;
@@ -24,8 +25,10 @@ class Models extends Collector
 
     protected Collection $modelComponents;
 
-    public function __construct(protected ModelInspector $inspector)
-    {
+    public function __construct(
+        protected ModelInspector $inspector,
+        protected Reflector $reflector,
+    ) {
         //
     }
 
@@ -213,7 +216,7 @@ class Models extends Collector
         ];
 
         foreach ($possibleMethods as $method) {
-            $returnType = $this->getReturnType($model, $method);
+            $returnType = $this->reflector->methodReturnType($model, $method);
 
             if ($returnType) {
                 return $returnType;
