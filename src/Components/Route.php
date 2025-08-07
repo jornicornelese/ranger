@@ -90,7 +90,7 @@ class Route
 
     public function setPossibleResponses(array $possibleResponses): void
     {
-        $this->possibleResponses = array_unique($possibleResponses);
+        $this->possibleResponses = array_unique($possibleResponses, SORT_REGULAR);
     }
 
     public function possibleResponses(): array

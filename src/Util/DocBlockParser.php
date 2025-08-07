@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Laravel\Ranger\Types\Contracts\Type as TypeContract;
 use Laravel\Ranger\Types\Type as RangerType;
 use PhpParser\Node\Expr\CallLike;
+use PHPStan\PhpDocParser\Ast\PhpDoc\MixinTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
@@ -85,6 +86,15 @@ class DocBlockParser
         return collect($propertyTagValues)->mapWithKeys(fn ($node) => [
             ltrim($node->propertyName, '$') => $this->resolve($node->type),
         ])->toArray();
+    }
+
+    public function parseMixins(string $docBlock): array
+    {
+        $this->parse($docBlock);
+
+        return collect($this->parsed->getMixinTagValues())
+            ->map(fn (MixinTagValueNode $node) => $this->resolve($node->type))
+            ->all();
     }
 
     protected function parse(string $docBlock): PhpDocNode

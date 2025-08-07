@@ -3,10 +3,12 @@
 namespace Laravel\Ranger\Util;
 
 use Laravel\Ranger\Debug;
+use PhpParser\Node;
 use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\NodeVisitor\ParentConnectingVisitor;
+use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser as PhpParserParser;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
@@ -43,10 +45,10 @@ class Parser
             default => $code->getFileName(),
         };
 
-        return $this->cache[$key] ??= $this->parseInternal($code);
+        return $this->cache[$key] ??= $this->parseCode($code);
     }
 
-    protected function parseInternal(string|ReflectionClass|ReflectionFunction|ReflectionMethod|SplFileInfo $code): array
+    protected function parseCode(string|ReflectionClass|ReflectionFunction|ReflectionMethod|SplFileInfo $code): array
     {
         try {
             $code = match (true) {
@@ -63,6 +65,33 @@ class Parser
 
             return [];
         }
+    }
+
+    public function walk(array $stmts, callable $onEnter, ?callable $onLeave = null): void
+    {
+        $visitor = new class($onEnter, $onLeave) extends NodeVisitorAbstract
+        {
+            public function __construct(
+                protected $onEnter,
+                protected $onLeave = null
+            ) {}
+
+            public function enterNode(Node $node)
+            {
+                return ($this->onEnter)($node);
+            }
+
+            public function leaveNode(Node $node)
+            {
+                if ($this->onLeave) {
+                    return ($this->onLeave)($node);
+                }
+            }
+        };
+
+        $this->nodeTraverser->addVisitor($visitor);
+        $this->nodeTraverser->traverse($stmts);
+        $this->nodeTraverser->removeVisitor($visitor);
     }
 
     public function nodeFinder()

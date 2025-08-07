@@ -10,4 +10,9 @@ class ArrayShapeType extends AbstractType implements Contracts\Type
     ) {
         //
     }
+
+    public function id(): string
+    {
+        return $this->keyType.':'.$this->valueType;
+    }
 }

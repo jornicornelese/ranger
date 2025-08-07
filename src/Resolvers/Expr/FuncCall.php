@@ -4,14 +4,20 @@ namespace Laravel\Ranger\Resolvers\Expr;
 
 use Laravel\Ranger\Resolvers\AbstractResolver;
 use Laravel\Ranger\Types\ArrayType;
+use Laravel\Ranger\Types\Contracts\Type;
 use Laravel\Ranger\Types\Contracts\Type as ResultContract;
 use Laravel\Ranger\Types\Type as RangerType;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
 
 class FuncCall extends AbstractResolver
 {
     public function resolve(Node\Expr\FuncCall $node): ResultContract
     {
+        if ($node->name instanceof Variable) {
+            return $this->from($node->name);
+        }
+
         if ($node->name->toString() === 'array_merge') {
             $arrays = collect($node->args)->map($this->from(...));
             $finalArray = collect();
@@ -43,7 +49,7 @@ class FuncCall extends AbstractResolver
 
         $result = $this->reflector->functionReturnType($node->name->toString(), $node);
 
-        if ($result instanceof Result) {
+        if ($result instanceof Type) {
             return $result;
         }
 

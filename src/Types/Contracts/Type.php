@@ -13,4 +13,6 @@ interface Type
     public function optional(): static;
 
     public function nullable(bool $nullable = true): static;
+
+    public function id(): string;
 }

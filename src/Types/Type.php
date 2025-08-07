@@ -87,6 +87,8 @@ class Type
 
     public static function union(...$args): Contracts\Type
     {
+        $args = collect($args)->unique(fn ($type) => (string) $type)->values()->all();
+
         if (count($args) === 1) {
             return $args[0];
         }

@@ -32,7 +32,7 @@ abstract class AbstractResolver
         return $this->stan->getType($node);
     }
 
-    protected function from(NodeAbstract $node)
+    protected function from(NodeAbstract|Type $node)
     {
         return $this->typeResolver->from($node, $this->context);
     }

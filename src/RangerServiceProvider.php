@@ -18,11 +18,8 @@ use Laravel\Ranger\Util\Parser;
 use Laravel\Ranger\Util\Reflector;
 use Laravel\Ranger\Util\Stan;
 use Phar;
-use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\ScopeFactory;
 use PHPStan\DependencyInjection\ContainerFactory;
-
-use function Orchestra\Testbench\workbench_path;
 
 class RangerServiceProvider extends ServiceProvider
 {
@@ -42,50 +39,35 @@ class RangerServiceProvider extends ServiceProvider
         $this->app->singleton(Parser::class);
         $this->app->singleton(Stan::class);
 
-        // TODO: Make this configurable
-        // if (app()->environment('testing')) {
-        //     app()->setBasePath('workbench');
-        //     $this->loadMigrationsFrom(
-        //         workbench_path('database/migrations')
-        //     );
-        // }
-
         // $this->mergeConfigFrom(
         //     __DIR__ . '/../config/ranger.php',
         //     'ranger'
         // );
 
-        // if ($this->app->runningInConsole()) {
-        //     $pharPath = __DIR__ . '/../vendor/phpstan/phpstan/phpstan.phar';
+        $pharPath = __DIR__.'/../vendor/phpstan/phpstan/phpstan.phar';
 
-        //     if (! file_exists($pharPath)) {
-        //         exit("PHPStan phar not found at: $pharPath\n");
-        //     }
+        if (! file_exists($pharPath)) {
+            exit("PHPStan phar not found at: $pharPath\n");
+        }
 
-        //     Phar::loadPhar($pharPath, 'phpstan.phar');
-        //     require_once 'phar://phpstan.phar/vendor/autoload.php';
+        Phar::loadPhar($pharPath, 'phpstan.phar');
+        require_once 'phar://phpstan.phar/vendor/autoload.php';
 
-        //     $tmpDir = __DIR__ . '/../../tmp';
+        $tmpDir = __DIR__.'/../../tmp';
 
-        //     File::ensureDirectoryExists($tmpDir);
+        File::ensureDirectoryExists($tmpDir);
 
-        //     $this->app->singleton(DocBlockParser::class, function ($app) {
-        //         return new DocBlockParser($this->app->make(DocBlockTypeResolver::class));
-        //     });
+        $this->app->singleton(DocBlockParser::class, function ($app) {
+            return new DocBlockParser($this->app->make(DocBlockTypeResolver::class));
+        });
 
-        //     $this->app->singleton(ScopeFactory::class, function ($app) {
-        //         $tmpDir = __DIR__ . '/../../tmp';
-        //         $containerFactory = new ContainerFactory($tmpDir);
-        //         $container = $containerFactory->create($tmpDir, [], []);
-        //         $scopeFactory = $container->getByType(ScopeFactory::class);
+        $this->app->singleton(ScopeFactory::class, function ($app) use ($tmpDir) {
+            $containerFactory = new ContainerFactory($tmpDir);
+            $container = $containerFactory->create($tmpDir, [], []);
+            $scopeFactory = $container->getByType(ScopeFactory::class);
 
-        //         return $scopeFactory;
-        //     });
-
-        //     $this->app->singleton(Parser::class, function ($app) {
-        //         return new Parser(new Standard);
-        //     });
-        // }
+            return $scopeFactory;
+        });
     }
 
     /**
@@ -122,7 +104,6 @@ class RangerServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\GenerateCommand::class,
                 Console\ScaffoldResolversCommand::class,
                 Console\ScaffoldDocBlockResolversCommand::class,
                 Console\ScaffoldPhpStanTypesCommand::class,

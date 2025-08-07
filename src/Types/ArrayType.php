@@ -23,4 +23,9 @@ class ArrayType extends AbstractType implements Contracts\Type
     {
         return array_is_list(collect($this->value)->toArray());
     }
+
+    public function id(): string
+    {
+        return collect($this->value)->toJson();
+    }
 }

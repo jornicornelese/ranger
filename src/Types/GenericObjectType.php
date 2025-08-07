@@ -12,4 +12,9 @@ class GenericObjectType extends AbstractType implements Contracts\Type
     ) {
         //
     }
+
+    public function id(): string
+    {
+        return $this->base.':'.collect($this->types)->toJson();
+    }
 }

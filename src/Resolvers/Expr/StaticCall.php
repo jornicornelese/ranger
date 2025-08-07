@@ -14,7 +14,10 @@ class StaticCall extends AbstractResolver
 {
     public function resolve(Node\Expr\StaticCall $node): ResultContract
     {
-        if (($known = Known::resolve($node->class->toString(), $node->name->name, ...$node->getArgs())) !== false) {
+        if (
+            method_exists($node->class, 'toString')
+            && ($known = Known::resolve($node->class->toString(), $node->name->name, ...$node->getArgs())) !== false
+        ) {
             return RangerType::from($known);
         }
 
@@ -39,28 +42,48 @@ class StaticCall extends AbstractResolver
         $varType = $this->from($node->class);
 
         if ($varType instanceof ClassType || (is_string($varType) && class_exists($varType))) {
-            $classVarType = $varType instanceof ClassType ? $varType->resolved() : $varType;
-            $varType = $varType instanceof ClassType ? $varType->value : $varType;
+            $resolvedClass = $varType;
+            $varType = $varType;
 
-            if ($classVarType !== $varType) {
-                $reflection = $this->reflector->reflectClass($classVarType);
-
-                $parsed = $this->parser->parse($reflection);
-
-                $methodNode = $this->parser->nodeFinder()->findFirst(
-                    $parsed,
-                    static fn (Node $n) => $n instanceof Node\Stmt\ClassMethod && $n->name->name === $node->name->name,
-                );
-
-                return $this->from($methodNode);
+            if ($varType instanceof ClassType) {
+                $resolvedClass = $varType->resolved();
+                $varType = $varType->value;
             }
 
-            $returnType = $this->reflector->methodReturnType($classVarType, $node->name->name, $node);
+            if ($resolvedClass !== $varType) {
+                $classCandidates = [$this->reflector->reflectClass($resolvedClass)];
+                $docBlock = $classCandidates[0]->getDocComment();
+
+                if ($docBlock) {
+                    $mixins = $this->docBlockParser->parseMixins($docBlock, $classCandidates);
+
+                    foreach ($mixins as $mixin) {
+                        if (class_exists($mixin->value)) {
+                            $classCandidates[] = $this->reflector->reflectClass($mixin->value);
+                        }
+                    }
+                }
+
+                foreach ($classCandidates as $reflection) {
+                    $parsed = $this->parser->parse($reflection);
+
+                    $methodNode = $this->parser->nodeFinder()->findFirst(
+                        $parsed,
+                        static fn (Node $n) => $n instanceof Node\Stmt\ClassMethod && $n->name->name === $node->name->name,
+                    );
+
+                    if ($methodNode !== null) {
+                        return $this->from($methodNode);
+                    }
+                }
+            }
+
+            $returnType = $this->reflector->methodReturnType($resolvedClass, $node->name->name, $node);
 
             // TODO: Ew
             // Try to get something more specific if we can
             if ($returnType instanceof ArrayShapeType) {
-                $reflection = $this->reflector->reflectMethod($classVarType, $node->name->name);
+                $reflection = $this->reflector->reflectMethod($resolvedClass, $node->name->name);
                 $foundNode = null;
 
                 $returns = collect($this->parser->nodeFinder()->find(

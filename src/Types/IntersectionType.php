@@ -8,4 +8,9 @@ class IntersectionType extends AbstractType implements Contracts\Type
     {
         //
     }
+
+    public function id(): string
+    {
+        return collect($this->types)->toJson();
+    }
 }

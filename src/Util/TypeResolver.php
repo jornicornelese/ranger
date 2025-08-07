@@ -3,6 +3,7 @@
 namespace Laravel\Ranger\Util;
 
 use Laravel\Ranger\Debug;
+use Laravel\Ranger\Types\Contracts\Type;
 use PhpParser\NodeAbstract;
 
 class TypeResolver
@@ -16,8 +17,12 @@ class TypeResolver
         return $this;
     }
 
-    public function from(NodeAbstract $node, array $context = [])
+    public function from(NodeAbstract|Type $node, array $context = [])
     {
+        if ($node instanceof Type) {
+            return $node;
+        }
+
         $className = str(get_class($node))->after('Node\\')->prepend('Laravel\\Ranger\\Resolvers\\')->toString();
 
         if (! class_exists($className)) {

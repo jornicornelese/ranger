@@ -17,11 +17,20 @@ class ClassType extends AbstractType implements Contracts\Type
         $reflection = new ReflectionClass($this->value);
 
         if ($reflection->isSubclassOf(Facade::class)) {
-            dd('oh hye', $this->value::getFacadeRoot());
+            // dd(
+            //     'oh hye',
+            //     $this->value::getFacadeRoot(),
+            //     get_class($this->value::getFacadeRoot())
+            // );
 
             return get_class($this->value::getFacadeRoot());
         }
 
         return $this->value;
+    }
+
+    public function id(): string
+    {
+        return $this->resolved();
     }
 }

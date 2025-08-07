@@ -5,6 +5,8 @@ namespace Laravel\Ranger\Collectors;
 use Illuminate\Support\Collection;
 use Laravel\Ranger\Components\InertiaSharedData as SharedDataComponent;
 use Laravel\Ranger\Types\ArrayType;
+use Laravel\Ranger\Types\Type;
+use Laravel\Ranger\Types\UnionType;
 use Laravel\Ranger\Util\Parser;
 use Laravel\Ranger\Util\TypeResolver;
 use PhpParser\Node;
@@ -59,6 +61,29 @@ class InertiaSharedData extends Collector
             return new SharedDataComponent(new ArrayType([]));
         }
 
-        return new SharedDataComponent($this->typeResolver->setParsed($this->parsed)->from($node));
+        $data = $this->typeResolver->setParsed($this->parsed)->from($node);
+
+        if ($data instanceof UnionType) {
+            $finalArray = [];
+
+            foreach ($data->types as $type) {
+                if ($type instanceof ArrayType) {
+                    foreach ($type->value as $key => $value) {
+                        $finalArray[$key] ??= [];
+                        $finalArray[$key][] = $value;
+                    }
+                } else {
+                    dd('Unexpected type in Inertia shared data: '.get_class($type));
+                }
+            }
+
+            foreach ($finalArray as $key => $values) {
+                $finalArray[$key] = Type::union(...$values);
+            }
+
+            $data = new ArrayType($finalArray);
+        }
+
+        return new SharedDataComponent($data);
     }
 }

@@ -2,13 +2,15 @@
 
 namespace Laravel\Ranger\Types;
 
-class AbstractType
+abstract class AbstractType
 {
     public bool $nullable = false;
 
     public bool $required = true;
 
     public bool $quote = false;
+
+    abstract public function id(): string;
 
     public function nullable(bool $nullable = true): static
     {
@@ -41,5 +43,10 @@ class AbstractType
     public function isOptional(): bool
     {
         return ! $this->required;
+    }
+
+    public function __toString()
+    {
+        return static::class.':'.$this->id();
     }
 }
