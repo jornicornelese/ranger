@@ -13,6 +13,7 @@ class Known
         RequestFacade::class => Request::class,
         HttpRequest::class => Request::class,
         AuthFacade::class => Auth::class,
+        'Inertia\\Inertia' => Inertia::class,
     ];
 
     public static function resolve(string $class, string $method, ...$args)

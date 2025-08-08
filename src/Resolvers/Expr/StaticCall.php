@@ -23,18 +23,6 @@ class StaticCall extends AbstractResolver
 
         $stanType = $this->getStanType($node);
 
-        if ($stanType instanceof ClassType) {
-            $return = match ($stanType->value) {
-                'Inertia\\LazyProp' => RangerType::from($this->from($node->getArgs()[0]))->optional(),
-                'Inertia\\AlwaysProp' => RangerType::from($this->from($node->getArgs()[0])),
-                default => null,
-            };
-
-            if ($return) {
-                return $return;
-            }
-        }
-
         if ($stanType !== null) {
             return $stanType;
         }
