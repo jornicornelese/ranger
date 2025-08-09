@@ -73,6 +73,22 @@ class DocBlockParser
         return RangerType::union(...$result);
     }
 
+    public function parseParam(string $docBlock, string $name): ?TypeContract
+    {
+        $this->parse($docBlock);
+
+        $tagValues = $this->parsed->getParamTagValues();
+
+        $value = collect($tagValues)
+            ->first(fn ($tag) => ltrim($tag->parameterName, '$') === ltrim($name, '$'));
+
+        if ($value) {
+            return $this->resolve($value->type);
+        }
+
+        return null;
+    }
+
     public function parseProperties(string $docBlock): array
     {
         $this->parse($docBlock);

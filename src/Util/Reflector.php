@@ -204,6 +204,14 @@ class Reflector
             return $this->returnType($param->getType());
         }
 
+        if ($reflection->getDocComment()) {
+            $paramType = $this->docBlockParser->parseParam($reflection->getDocComment(), $paramName);
+
+            if ($paramType) {
+                return $paramType;
+            }
+        }
+
         return null;
     }
 
