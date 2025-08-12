@@ -11,6 +11,6 @@ class String_ extends AbstractResolver
 {
     public function resolve(Node\Scalar\String_ $node): ResultContract
     {
-        return RangerType::string();
+        return RangerType::string($node->value);
     }
 }

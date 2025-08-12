@@ -52,6 +52,9 @@ class Variable extends AbstractResolver
         $this->parser->walk([$method], function (Node $n) use (&$ifStack, &$values, &$value, $node) {
             if ($n instanceof Node\Stmt\If_) {
                 $ifStack++;
+                // if ($n->cond instanceof Node\Expr\BinaryOp\BooleanAnd) {
+                //     dd($n->cond);
+                // }
             }
 
             if (
