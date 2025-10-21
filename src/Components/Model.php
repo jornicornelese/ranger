@@ -2,7 +2,7 @@
 
 namespace Laravel\Ranger\Components;
 
-use Laravel\Ranger\Types\Contracts\Type;
+use Laravel\Surveyor\Types\Contracts\Type;
 
 class Model
 {

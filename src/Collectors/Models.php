@@ -10,12 +10,10 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Collection;
 use Laravel\Ranger\Components\Model as ModelComponent;
-use Laravel\Ranger\Types\Contracts\Type as TypeContract;
-use Laravel\Ranger\Types\Type;
-use Laravel\Ranger\Types\UnionType;
 use Laravel\Ranger\Util\Arrayable as UtilArrayable;
-use Laravel\Ranger\Util\DocBlockParser;
-use Laravel\Ranger\Util\Reflector;
+use Laravel\Surveyor\Analyzer\Analyzer;
+use Laravel\Surveyor\Types\Contracts\Type as TypeContract;
+use Laravel\Surveyor\Types\Type;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionUnionType;
@@ -28,11 +26,8 @@ class Models extends Collector
 
     protected Collection $modelComponents;
 
-    public function __construct(
-        protected ModelInspector $inspector,
-        protected Reflector $reflector,
-        protected DocBlockParser $docBlockParser,
-    ) {
+    public function __construct(protected ModelInspector $inspector, protected Analyzer $analyzer)
+    {
         //
     }
 
@@ -59,7 +54,7 @@ class Models extends Collector
 
     protected function mapToModel(string $model): void
     {
-        $reflection = $this->reflector->reflectClass($model);
+        $reflection = new ReflectionClass($model);
 
         if (! $reflection->isInstantiable()) {
             return;
@@ -79,17 +74,13 @@ class Models extends Collector
 
     protected function resolveFromReflection(ModelComponent $modelComponent): void
     {
-        $reflection = $this->reflector->reflectClass($modelComponent->name);
+        $reflection = new ReflectionClass($modelComponent->name);
 
-        if ($reflection->getDocComment()) {
-            $props = $this->docBlockParser->parseProperties($reflection->getDocComment());
+        $analyzed = $this->analyzer->analyze($reflection->getFileName());
 
-            foreach ($props as $name => $type) {
-                if ($type instanceof UnionType) {
-                    $type->nullable(collect($type->types)->contains(fn (TypeContract $t) => $t->nullable));
-                }
-
-                $modelComponent->addAttribute($name, $type);
+        foreach ($analyzed->result()->properties as $name => $attr) {
+            if ($attr->fromDocBlock) {
+                $modelComponent->addAttribute($name, $attr->type);
             }
         }
 
