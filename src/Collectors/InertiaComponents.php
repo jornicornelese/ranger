@@ -3,6 +3,7 @@
 namespace Laravel\Ranger\Collectors;
 
 use Laravel\Ranger\Components\InertiaResponse;
+use Laravel\Surveyor\Result\VariableState;
 use Laravel\Surveyor\Types\ArrayShapeType;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\CallableType;
@@ -43,6 +44,10 @@ class InertiaComponents
         }
 
         foreach ($data->value as $key => $value) {
+            if ($value instanceof VariableState) {
+                $value = $value->type();
+            }
+
             if (in_array($key, $same)) {
                 if (get_class($value) !== get_class($existingData[$key])) {
                     $value1 = $value instanceof UnionType ? $value->types : [$value];
