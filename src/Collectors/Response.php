@@ -5,20 +5,17 @@ namespace Laravel\Ranger\Collectors;
 use Closure;
 use Laravel\Ranger\Components\JsonResponse;
 use Laravel\Ranger\Debug;
-use Laravel\Ranger\Util\Parser;
-use Laravel\Ranger\Util\TypeResolver;
-use PhpParser\Node;
-use ReflectionClass;
+use Laravel\Surveyor\Analyzed\MethodResult;
+use Laravel\Surveyor\Analyzer\Analyzer;
+use Laravel\Surveyor\Types\ArrayType;
+use Laravel\Surveyor\Types\Contracts\MultiType;
+use Laravel\Surveyor\Types\Entities\InertiaRender;
 use ReflectionFunction;
-use ReflectionMethod;
 
 class Response
 {
-    protected array $parsed = [];
-
     public function __construct(
-        protected Parser $parser,
-        protected TypeResolver $typeResolver,
+        protected Analyzer $analyzer,
     ) {
         //
     }
@@ -29,151 +26,55 @@ class Response
             $reflection = new ReflectionFunction($routeUses['uses']);
         } else {
             [$controller, $method] = explode('@', $routeUses['uses']);
-            $classReflection = new ReflectionClass($controller);
+            $analyzed = $this->analyzer->analyzeClass($controller)->result();
 
-            if (! $classReflection->hasMethod($method)) {
+            if (! $analyzed->hasMethod($method)) {
                 Debug::log("Method {$method} not found in class {$controller}");
 
                 return [];
             }
 
-            $reflection = $classReflection->getMethod($method);
+            $reflection = $analyzed->getMethod($method);
         }
 
-        $this->parsed = $this->parser->parse($reflection);
+        if (! $reflection instanceof MethodResult) {
+            // TODO: Deal with closures
+            info('Non-method reflection in route uses!');
 
-        return $this->getInertiaResponse($reflection) ?? $this->getJsonResponse($reflection) ?? [];
-    }
+            return [];
+        }
 
-    protected function getInertiaResponse(ReflectionFunction|ReflectionMethod $reflection): ?array
-    {
-        $nodes = $this->parser->nodeFinder()->find(
-            $this->parsed,
-            fn ($node) => (
-                $node->getStartLine() >= $reflection->getStartLine() &&
-                $node->getEndLine() <= $reflection->getEndLine()
-            ) && ((
-                $node instanceof Node\Expr\StaticCall &&
-                $node->class instanceof Node\Name\FullyQualified &&
-                $node->class->toString() === 'Inertia\\Inertia' &&
-                $node->name->toString() === 'render'
-            ) || (
-                $node instanceof Node\Expr\FuncCall &&
-                $node->name instanceof Node\Name &&
-                $node->name->toString() === 'inertia'
-            )),
+        return array_merge(
+            $this->getInertiaResponse($reflection),
+            $this->getJsonResponse($reflection),
         );
-
-        if (count($nodes) === 0) {
-            return null;
-        }
-
-        $result = $this->processInertiaNodes($nodes);
-
-        return $result;
     }
 
-    protected function getJsonResponse(ReflectionFunction|ReflectionMethod $reflection): ?array
+    protected function getInertiaResponse(MethodResult $result): array
     {
-        $node = null;
+        /** @var InertiaRender[] $responses */
+        $responses = $this->filterReturnTypesFor($result, fn ($type) => $type instanceof InertiaRender);
 
-        $returns = collect($this->parser->nodeFinder()->find(
-            $this->parsed,
-            function ($n) use ($reflection, &$node) {
-                if (
-                    $n->getStartLine() < $reflection->getStartLine() ||
-                    $n->getEndLine() > $reflection->getEndLine()
-                ) {
-                    return false;
-                }
-
-                $node ??= $n;
-
-                if (! ($n instanceof Node\Stmt\Return_)) {
-                    return false;
-                }
-
-                $parent = $n->getAttribute('parent');
-
-                while ($parent && $parent !== $node) {
-                    if ($parent instanceof Node\Expr\Closure) {
-                        return false;
-                    }
-
-                    $parent = $parent->getAttribute('parent');
-                }
-
-                return $parent === $node;
-            }
-        ));
-
-        if (count($returns) === 0) {
-            return null;
+        foreach ($responses as $response) {
+            InertiaComponents::addComponent($response->view, $response->data);
         }
 
-        $result = $this->processReturnNodes($returns);
-
-        if (count($result) === 0) {
-            return null;
-        }
-
-        return $result;
+        return array_map(fn ($response) => $response->view, $responses);
     }
 
-    protected function processReturnNodes($returns): array
+    protected function getJsonResponse(MethodResult $result): array
     {
-        $renders = [];
+        /** @var ArrayType[] $responses */
+        $responses = $this->filterReturnTypesFor($result, fn ($type) => $type instanceof ArrayType);
 
-        foreach ($returns as $return) {
-            if (! $return->expr instanceof Node\Expr\Array_) {
-                continue;
-            }
-
-            $data = [];
-
-            foreach ($return->expr->items as $item) {
-                if ($item->key && $item->key instanceof Node\Scalar\String_) {
-                    $data[$item->key->value] = $this->typeResolver->setParsed($this->parsed)->from($item->value);
-                }
-            }
-
-            $renders[] = new JsonResponse($data);
-        }
-
-        return $renders;
+        return array_map(fn ($response) => new JsonResponse($response->value), $responses);
     }
 
-    /**
-     * @param  Node[]  $nodes
-     */
-    protected function processInertiaNodes(array $nodes): array
+    protected function filterReturnTypesFor(MethodResult $result, Closure $filter): array
     {
-        $results = [];
+        $returnType = $result->returnType();
+        $returnTypes = ($returnType instanceof MultiType) ? $returnType->types : [$returnType];
 
-        foreach ($nodes as $node) {
-            if (! isset($node->args[1])) {
-                InertiaComponents::addComponent($node->args[0]->value->value, []);
-                $results[] = $node->args[0]->value->value;
-
-                continue;
-            }
-
-            if (! $node->args[1]->value instanceof Node\Expr\Array_) {
-                continue;
-            }
-
-            $data = [];
-
-            foreach ($node->args[1]->value->items as $item) {
-                if ($item->key && $item->key instanceof Node\Scalar\String_) {
-                    $data[$item->key->value] = $this->typeResolver->setParsed($this->parsed)->from($item->value);
-                }
-            }
-
-            InertiaComponents::addComponent($node->args[0]->value->value, $data);
-            $results[] = $node->args[0]->value->value;
-        }
-
-        return $results;
+        return array_values(array_filter($returnTypes, $filter));
     }
 }
