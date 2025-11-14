@@ -9,7 +9,6 @@ use Laravel\Surveyor\Analyzed\ClassResult;
 use Laravel\Surveyor\Analyzer\Analyzer;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\Contracts\Type;
-use ReflectionClass;
 use Spatie\StructureDiscoverer\Discover;
 
 class BroadcastEvents extends Collector
@@ -33,7 +32,7 @@ class BroadcastEvents extends Collector
 
     protected function toBroadcastEvent(string $class): BroadcastEvent
     {
-        $analyzed = $this->analyzer->analyze((new ReflectionClass($class))->getFileName())->result();
+        $analyzed = $this->analyzer->analyzeClass($class)->result();
 
         $eventName = $this->resolveEventName($analyzed, $class);
         $broadcastWith = $this->resolveBroadcastWith($analyzed);
@@ -59,6 +58,10 @@ class BroadcastEvents extends Collector
             return $analyzed->getMethod('broadcastWith')->returnType();
         }
 
-        return new ArrayType($analyzed->publicProperties());
+        return new ArrayType(
+            collect($analyzed->publicProperties())->mapWithKeys(
+                fn ($prop) => [$prop->name => $prop->type],
+            )->all(),
+        );
     }
 }

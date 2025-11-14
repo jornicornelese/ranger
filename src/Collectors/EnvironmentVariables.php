@@ -19,6 +19,20 @@ class EnvironmentVariables extends Collector
 
         return collect($_ENV)
             ->filter(fn ($value, $key) => preg_match('/^'.$key.'=/m  ', $envFile) === 1)
-            ->map(fn ($value, $key) => new EnvironmentVariable($key, env($key)));
+            ->map($this->toComponent(...))
+            ->values();
+    }
+
+    protected function toComponent(string $envValue, string $envKey): EnvironmentVariable
+    {
+        $value = env($envKey);
+
+        if (is_float($value)) {
+            $value = (float) $value;
+        } elseif (is_numeric($value)) {
+            $value = (int) $value;
+        }
+
+        return new EnvironmentVariable($envKey, $value);
     }
 }
