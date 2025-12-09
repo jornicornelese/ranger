@@ -2,9 +2,6 @@
 
 namespace Laravel\Ranger;
 
-// TODO: Temp fix, gotta figure this out...
-// ini_set('memory_limit', '1G');
-
 use Illuminate\Support\ServiceProvider;
 use Laravel\Ranger\Collectors\BroadcastChannels;
 use Laravel\Ranger\Collectors\BroadcastEvents;
@@ -16,10 +13,8 @@ class RangerServiceProvider extends ServiceProvider
 {
     /**
      * Register any package services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(Enums::class);
         $this->app->singleton(Models::class);
@@ -30,20 +25,16 @@ class RangerServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any package services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPublishing();
     }
 
     /**
      * Register the package's publishable resources.
-     *
-     * @return void
      */
-    protected function registerPublishing()
+    protected function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
