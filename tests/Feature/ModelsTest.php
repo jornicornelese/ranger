@@ -18,7 +18,7 @@ describe('model collection', function () {
 
     it('finds the User model', function () {
         $models = $this->collector->collect();
-        $userModel = $models->first(fn(Model $m) => $m->name === User::class);
+        $userModel = $models->first(fn (Model $m) => $m->name === User::class);
 
         expect($userModel)->not->toBeNull();
         expect($userModel)->toBeInstanceOf(Model::class);
@@ -26,7 +26,7 @@ describe('model collection', function () {
 
     it('finds the Post model', function () {
         $models = $this->collector->collect();
-        $postModel = $models->first(fn(Model $m) => $m->name === Post::class);
+        $postModel = $models->first(fn (Model $m) => $m->name === Post::class);
 
         expect($postModel)->not->toBeNull();
         expect($postModel)->toBeInstanceOf(Model::class);
@@ -36,7 +36,7 @@ describe('model collection', function () {
 describe('model attributes', function () {
     it('captures model attributes', function () {
         $models = $this->collector->collect();
-        $userModel = $models->first(fn(Model $m) => $m->name === User::class);
+        $userModel = $models->first(fn (Model $m) => $m->name === User::class);
 
         $attributes = $userModel->getAttributes();
 
@@ -47,7 +47,7 @@ describe('model attributes', function () {
 describe('model relations', function () {
     it('captures relations from models', function () {
         $models = $this->collector->collect();
-        $userModel = $models->first(fn(Model $m) => $m->name === User::class);
+        $userModel = $models->first(fn (Model $m) => $m->name === User::class);
 
         $relations = $userModel->getRelations();
 
@@ -56,7 +56,7 @@ describe('model relations', function () {
 
     it('captures belongsTo relations on Post model', function () {
         $models = $this->collector->collect();
-        $postModel = $models->first(fn(Model $m) => $m->name === Post::class);
+        $postModel = $models->first(fn (Model $m) => $m->name === Post::class);
 
         $relations = $postModel->getRelations();
 

@@ -1,18 +1,18 @@
 <?php
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Broadcast;
 use Laravel\Ranger\Components\BroadcastChannel;
 use Laravel\Ranger\Components\BroadcastEvent;
 use Laravel\Ranger\Components\Enum;
 use Laravel\Ranger\Components\Model;
 use Laravel\Ranger\Components\Route;
 use Laravel\Ranger\Ranger;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Broadcast;
 
 beforeEach(function () {
     Broadcast::channel('test.channel', fn () => true);
 
-    $this->ranger = new Ranger();
+    $this->ranger = new Ranger;
 });
 
 describe('route callbacks', function () {
