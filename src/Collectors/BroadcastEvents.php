@@ -30,6 +30,9 @@ class BroadcastEvents extends Collector
             ->map($this->toBroadcastEvent(...));
     }
 
+    /**
+     * @param  class-string<ShouldBroadcast>  $class
+     */
     protected function toBroadcastEvent(string $class): BroadcastEvent
     {
         $analyzed = $this->analyzer->analyzeClass($class)->result();
@@ -43,6 +46,9 @@ class BroadcastEvents extends Collector
         return $event;
     }
 
+    /**
+     * @param  class-string<ShouldBroadcast>  $class
+     */
     protected function resolveEventName(ClassResult $analyzed, string $class): string
     {
         if ($analyzed->hasMethod('broadcastAs')) {

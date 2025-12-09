@@ -8,13 +8,19 @@ abstract class Collector
 {
     protected Collection $cached;
 
+    /**
+     * @param  callable[]  $callbacks
+     */
     public function run(array $callbacks): void
     {
-        $componentCallbacks = collect($callbacks);
-
-        $this->getCollection()->each(fn ($item) => $componentCallbacks->each(fn ($callback) => $callback($item)));
+        foreach ($callbacks as $callback) {
+            $this->getCollection()->each(fn ($item) => $callback($item));
+        }
     }
 
+    /**
+     * @param  callable[]  $callbacks
+     */
     public function runOnCollection(array $callbacks): void
     {
         collect($callbacks)->each(fn ($callback) => $callback($this->getCollection()));
@@ -22,9 +28,7 @@ abstract class Collector
 
     public function getCollection(): Collection
     {
-        $this->cached ??= $this->collect();
-
-        return $this->cached;
+        return $this->cached ??= $this->collect();
     }
 
     abstract public function collect(): Collection;
