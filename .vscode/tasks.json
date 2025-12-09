@@ -5,7 +5,13 @@
             "label": "Run Pint",
             "type": "shell",
             "command": "./vendor/bin/pint --dirty",
-            "problemMatcher": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "./vendor/bin/pest",
+            "problemMatcher": []
         }
     ]
 }
