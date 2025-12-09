@@ -4,17 +4,17 @@ namespace Laravel\Ranger\Concerns;
 
 trait HasFilePath
 {
-    protected string $filepath;
+    protected string $filePath;
 
-    public function setFilePath(string $filepath): static
+    public function setFilePath(string $filePath): static
     {
-        $this->filepath = $filepath;
+        $this->filePath = $filePath;
 
         return $this;
     }
 
     public function filePath(): string
     {
-        return $this->filepath;
+        return $this->filePath;
     }
 }
