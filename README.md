@@ -1,40 +1,73 @@
-<p align="center"><img src="/art/logo.svg" alt="Logo Laravel Package"></p>
+<!-- <p align="center"><img src="/art/logo.svg" alt="Laravel Ranger"></p> -->
 
 <p align="center">
-<a href="https://github.com/laravel/package-template/actions"><img src="https://github.com/laravel/package-template/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/package-template"><img src="https://img.shields.io/packagist/dt/laravel/package-template" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/package-template"><img src="https://img.shields.io/packagist/v/laravel/package-template" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/package-template"><img src="https://img.shields.io/packagist/l/laravel/package-template" alt="License"></a>
+<a href="https://github.com/laravel/ranger/actions"><img src="https://github.com/laravel/ranger/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/ranger"><img src="https://img.shields.io/packagist/dt/laravel/ranger" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/ranger"><img src="https://img.shields.io/packagist/v/laravel/ranger" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/ranger"><img src="https://img.shields.io/packagist/l/laravel/ranger" alt="License"></a>
 </p>
 
-> This is a template repository for new Laravel packages. [Start a new repo with this](https://github.com/laravel/package-template/generate), clone it locally and search & replace the relevant things below:
->
-> -   `Laravel Package` with the package name (e.g. `Laravel Horizon`)
-> -   `laravel/package-template` references to the vendor name / GitHub url (e.g. `laravel/horizon`) (\*)
-> -   `ranger` references to the publishing name (e.g. `horizon`) (\*)
-> -   `Laravel\Package` references to the package namespace (e.g. `Laravel\Horizon`) (\*)
-> -   `Ranger` references to the short package name (e.g. `Horizon`) (\*)
-> -   `LARAVEL_PACKAGE` references to the env variable names (e.g. `HORIZON`) (\*)
->
-> (\*) Name cannot contain spaces.
->
-> After replacing keywords, take the following steps:
->
-> 1. Rename any `Ranger` prefixes in `.php` file names in [`src`](./src) to the package name (e.g. `Horizon`)
-> 2. Remove things you don't need like migrations, routes, resources, etc
-> 3. Fill the package short intro and keywords in the [composer.json](./composer.json) file
-> 4. Set the same short intro and keywords in the GitHub repository sidebar and set the website url to the package docs
-> 5. Fill out the package long introduction in the readme
-> 6. Set the correct link to the docs in the readme
-> 7. Replace the `art/logo.svg` with the new package logo
-> 8. Replace the `public/favicon.ico` with the new package favicon (optional)
-> 9. Remove this quote block from your readme
->
-> All that's left for you is to start building your new package! 🛠
+# Laravel Ranger
 
 ## Introduction
 
-Package introduction...
+Ranger is a powerful introspection library for Laravel applications. It walks through your codebase and collects detailed information about your application's components, including routes, models, enums, broadcast events, environment variables, and Inertia.js components.
+
+With Ranger, you can register callbacks that fire as each component is discovered, each callback returns a detailed Data Transport Object (DTO) that you can decide what to do with.
+
+### Basic Usage
+
+```php
+use Laravel\Ranger\Ranger;
+use Laravel\Ranger\Components;
+use Illuminate\Support\Collection;
+
+$ranger = app(Ranger::class);
+
+// Register callbacks for individual items
+$ranger->onRoute(function (Components\Route $route) {
+    echo $route->uri();
+});
+
+$ranger->onModel(function (Components\Model $model) {
+    foreach ($model->getAttributes() as $name => $type) {
+        //
+    }
+});
+
+$ranger->onEnum(function (Components\Enum $enum) {
+    //
+});
+
+$ranger->onBroadcastEvent(function (Components\BroadcastEvent $event) {
+    //
+});
+
+// Or register callbacks for entire collections
+$ranger->onRoutes(function (Collection $routes) {
+    // Called once all of the routes have been discovered and processed
+});
+
+$ranger->onModels(function (Collection $models) {
+    // Called once all of the models have been discovered and processed
+});
+
+// Walk through the application and trigger all callbacks
+$ranger->walk();
+```
+
+### What Ranger Collects
+
+| Collector                 | Description                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Routes**                | All registered routes with URIs, parameters, HTTP verbs, controllers, validation rules, and possible responses |
+| **Models**                | Eloquent models with their attributes, types, and relationships                                                |
+| **Enums**                 | PHP backed enums with their cases and values                                                                   |
+| **Broadcast Events**      | Events implementing `ShouldBroadcast` with their payloads                                                      |
+| **Broadcast Channels**    | Registered broadcast channels                                                                                  |
+| **Environment Variables** | Variables defined in your `.env` file                                                                          |
+| **Inertia Shared Data**   | Globally shared Inertia.js props                                                                               |
+| **Inertia Components**    | Inertia.js page components with their expected props                                                           |
 
 ## Official Documentation
 
@@ -54,4 +87,4 @@ Please review [our security policy](https://github.com/laravel/envoy/security/po
 
 ## License
 
-Laravel Package is open-sourced software licensed under the [MIT license](LICENSE.md).
+Laravel Ranger is open-sourced software licensed under the [MIT license](LICENSE.md).
