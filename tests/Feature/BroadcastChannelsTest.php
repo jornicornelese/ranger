@@ -5,9 +5,9 @@ use Laravel\Ranger\Collectors\BroadcastChannels;
 use Laravel\Ranger\Components\BroadcastChannel;
 
 beforeEach(function () {
-    Broadcast::channel('users.{id}', fn($user, $id) => (int) $user->id === (int) $id);
-    Broadcast::channel('posts', fn() => true);
-    Broadcast::channel('team.{team}', fn($user, $team) => $user->belongsToTeam($team));
+    Broadcast::channel('users.{id}', fn ($user, $id) => (int) $user->id === (int) $id);
+    Broadcast::channel('posts', fn () => true);
+    Broadcast::channel('team.{team}', fn ($user, $team) => $user->belongsToTeam($team));
 
     $this->collector = app(BroadcastChannels::class);
 });
@@ -39,7 +39,7 @@ describe('broadcast channel collection', function () {
 
     it('captures channel resolver', function () {
         $channels = $this->collector->collect();
-        $usersChannel = $channels->first(fn(BroadcastChannel $c) => $c->name === 'users.{id}');
+        $usersChannel = $channels->first(fn (BroadcastChannel $c) => $c->name === 'users.{id}');
 
         expect($usersChannel->resolvesTo)->not->toBeNull();
     });

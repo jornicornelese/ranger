@@ -21,7 +21,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../workbench/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../workbench/database/migrations');
     }
 
     protected function defineEnvironment($app): void
@@ -36,13 +36,13 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineRoutes($router): void
     {
-        require __DIR__ . '/../workbench/routes/web.php';
+        require __DIR__.'/../workbench/routes/web.php';
     }
 
     protected function getEnvironmentSetUp($app): void
     {
         $app['config']->set('app.key', 'base64:uz4B1RtFO57QGzbZX1kRYX9hIRB50+QzqFeg9zbFJlY=');
 
-        $app->useAppPath(__DIR__ . '/../workbench/app');
+        $app->useAppPath(__DIR__.'/../workbench/app');
     }
 }

@@ -12,7 +12,6 @@ use Laravel\Ranger\Components\Validator;
 use Laravel\Ranger\Components\Verb;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\StringType;
-use Laravel\Surveyor\Types\IntType;
 
 describe('Enum component', function () {
     it('can be instantiated with name and cases', function () {
@@ -45,7 +44,7 @@ describe('Model component', function () {
 
     it('can add and retrieve attributes', function () {
         $model = new Model('App\\Models\\User');
-        $type = new StringType();
+        $type = new StringType;
 
         $model->addAttribute('name', $type);
         $model->addAttribute('email', $type);
@@ -58,7 +57,7 @@ describe('Model component', function () {
 
     it('can add and retrieve relations', function () {
         $model = new Model('App\\Models\\User');
-        $type = new StringType();
+        $type = new StringType;
 
         $model->addRelation('posts', $type);
         $model->addRelation('profile', $type);
@@ -82,7 +81,7 @@ describe('BroadcastChannel component', function () {
 
 describe('BroadcastEvent component', function () {
     it('can be instantiated with name, className, and data', function () {
-        $data = new ArrayType(['user' => new StringType()]);
+        $data = new ArrayType(['user' => new StringType]);
         $event = new BroadcastEvent('user.created', 'App\\Events\\UserCreated', $data);
 
         expect($event->name)->toBe('user.created');
@@ -132,7 +131,7 @@ describe('EnvironmentVariable component', function () {
 describe('InertiaResponse component', function () {
     it('can be instantiated with component and data', function () {
         $response = new InertiaResponse('Pages/Dashboard', [
-            'user' => new StringType(),
+            'user' => new StringType,
         ]);
 
         expect($response->component)->toBe('Pages/Dashboard');
@@ -142,7 +141,7 @@ describe('InertiaResponse component', function () {
 
 describe('InertiaSharedData component', function () {
     it('can be instantiated with data', function () {
-        $data = new ArrayType(['auth' => new StringType()]);
+        $data = new ArrayType(['auth' => new StringType]);
         $shared = new InertiaSharedData($data);
 
         expect($shared->data)->toBe($data);

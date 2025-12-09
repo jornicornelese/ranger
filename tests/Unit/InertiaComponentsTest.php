@@ -3,8 +3,8 @@
 use Laravel\Ranger\Collectors\InertiaComponents;
 use Laravel\Ranger\Components\InertiaResponse;
 use Laravel\Surveyor\Types\ArrayType;
-use Laravel\Surveyor\Types\StringType;
 use Laravel\Surveyor\Types\IntType;
+use Laravel\Surveyor\Types\StringType;
 
 beforeEach(function () {
     $reflection = new ReflectionClass(InertiaComponents::class);
@@ -14,7 +14,7 @@ beforeEach(function () {
 
 describe('InertiaComponents static class', function () {
     it('can add and retrieve components', function () {
-        $data = new ArrayType(['title' => new StringType()]);
+        $data = new ArrayType(['title' => new StringType]);
         InertiaComponents::addComponent('Dashboard', $data);
 
         $component = InertiaComponents::getComponent('Dashboard');
@@ -32,8 +32,8 @@ describe('InertiaComponents static class', function () {
     });
 
     it('merges data from multiple additions of same component', function () {
-        $data1 = new ArrayType(['title' => new StringType()]);
-        $data2 = new ArrayType(['count' => new IntType()]);
+        $data1 = new ArrayType(['title' => new StringType]);
+        $data2 = new ArrayType(['count' => new IntType]);
 
         InertiaComponents::addComponent('Page', $data1);
         InertiaComponents::addComponent('Page', $data2);

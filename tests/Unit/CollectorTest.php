@@ -5,12 +5,14 @@ use Laravel\Ranger\Collectors\Collector;
 
 describe('Collector base class', function () {
     it('caches the collection after first call', function () {
-        $collector = new class extends Collector {
+        $collector = new class extends Collector
+        {
             public int $collectCalls = 0;
 
             public function collect(): Collection
             {
                 $this->collectCalls++;
+
                 return collect(['item1', 'item2']);
             }
         };
@@ -23,7 +25,8 @@ describe('Collector base class', function () {
     });
 
     it('runs callbacks on each item', function () {
-        $collector = new class extends Collector {
+        $collector = new class extends Collector
+        {
             public function collect(): Collection
             {
                 return collect(['a', 'b', 'c']);
@@ -44,7 +47,8 @@ describe('Collector base class', function () {
     });
 
     it('runs multiple callbacks on each item', function () {
-        $collector = new class extends Collector {
+        $collector = new class extends Collector
+        {
             public function collect(): Collection
             {
                 return collect(['x', 'y']);
@@ -56,10 +60,10 @@ describe('Collector base class', function () {
 
         $callbacks = [
             function ($item) use (&$results1) {
-                $results1[] = $item . '1';
+                $results1[] = $item.'1';
             },
             function ($item) use (&$results2) {
-                $results2[] = $item . '2';
+                $results2[] = $item.'2';
             },
         ];
 
@@ -70,7 +74,8 @@ describe('Collector base class', function () {
     });
 
     it('runs collection callbacks with entire collection', function () {
-        $collector = new class extends Collector {
+        $collector = new class extends Collector
+        {
             public function collect(): Collection
             {
                 return collect(['a', 'b', 'c']);
@@ -93,7 +98,8 @@ describe('Collector base class', function () {
     });
 
     it('runs multiple collection callbacks', function () {
-        $collector = new class extends Collector {
+        $collector = new class extends Collector
+        {
             public function collect(): Collection
             {
                 return collect([1, 2, 3]);

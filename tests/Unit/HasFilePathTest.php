@@ -4,7 +4,8 @@ use Laravel\Ranger\Concerns\HasFilePath;
 
 describe('HasFilePath trait', function () {
     it('can set and get file path', function () {
-        $class = new class {
+        $class = new class
+        {
             use HasFilePath;
         };
 
@@ -15,7 +16,8 @@ describe('HasFilePath trait', function () {
     });
 
     it('returns self for method chaining', function () {
-        $class = new class {
+        $class = new class
+        {
             use HasFilePath;
         };
 
