@@ -9,6 +9,9 @@
 
 # Laravel Ranger
 
+> [!IMPORTANT]
+> Ranger is currently in Beta, the API is subject (and likely) to change prior to the v1.0.0 release. All notable changes will be documented in the [changelog](./CHANGELOG.md).
+
 ## Introduction
 
 Ranger is a powerful introspection library for Laravel applications. It walks through your codebase and collects detailed information about your application's components, including routes, models, enums, broadcast events, environment variables, and Inertia.js components.
