@@ -11,11 +11,8 @@ class FormRequests
 {
     use AnalyzesRoutes;
 
-    protected $imports = [];
-
-    public function __construct(
-        protected Analyzer $analyzer,
-    ) {
+    public function __construct(protected Analyzer $analyzer)
+    {
         //
     }
 
@@ -27,7 +24,6 @@ class FormRequests
             return null;
         }
 
-        // TODO: Undot?
         return new Validator(
             array_map(
                 fn ($rules) => array_map(fn ($rule) => new Rule($rule), $rules),

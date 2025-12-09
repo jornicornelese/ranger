@@ -18,14 +18,17 @@ class BroadcastEvents extends Collector
         //
     }
 
+    /**
+     * @return Collection<BroadcastEvent>
+     */
     public function collect(): Collection
     {
-        return collect(
-            Discover::in(app_path())
-                ->classes()
-                ->implementing(ShouldBroadcast::class)
-                ->get(),
-        )
+        $discovered = Discover::in(app_path())
+            ->classes()
+            ->implementing(ShouldBroadcast::class)
+            ->get();
+
+        return collect($discovered)
             ->filter()
             ->map($this->toBroadcastEvent(...));
     }

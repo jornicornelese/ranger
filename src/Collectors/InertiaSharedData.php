@@ -8,31 +8,34 @@ use Laravel\Surveyor\Analyzer\Analyzer;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\Type;
 use Laravel\Surveyor\Types\UnionType;
-use ReflectionClass;
 use Spatie\StructureDiscoverer\Discover;
 
 class InertiaSharedData extends Collector
 {
-    protected array $parsed = [];
-
     public function __construct(protected Analyzer $analyzer)
     {
         //
     }
 
+    /**
+     * @return Collection<SharedDataComponent>
+     */
     public function collect(): Collection
     {
-        return collect(
-            Discover::in(app_path())
-                ->classes()
-                ->extending('Inertia\\Middleware')
-                ->get()
-        )->map($this->processSharedData(...));
+        $discovered = Discover::in(app_path())
+            ->classes()
+            ->extending('Inertia\\Middleware')
+            ->get();
+
+        return collect($discovered)->map($this->processSharedData(...));
     }
 
+    /**
+     * @param  class-string<\Inertia\Middleware>  $class
+     */
     protected function processSharedData(string $class): SharedDataComponent
     {
-        $result = $this->analyzer->analyze((new ReflectionClass($class))->getFileName())->result();
+        $result = $this->analyzer->analyzeClass($class)->result();
 
         if (! $result->hasMethod('share')) {
             return new SharedDataComponent(new ArrayType([]));
@@ -49,8 +52,6 @@ class InertiaSharedData extends Collector
                         $finalArray[$key] ??= [];
                         $finalArray[$key][] = $value;
                     }
-                } else {
-                    dd('Unexpected type in Inertia shared data: '.get_class($type));
                 }
             }
 

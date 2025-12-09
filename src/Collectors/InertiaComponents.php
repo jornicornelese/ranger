@@ -12,6 +12,9 @@ use Laravel\Surveyor\Types\UnionType;
 
 class InertiaComponents
 {
+    /**
+     * @var array<string, array<string, Type>>
+     */
     protected static array $components = [];
 
     public static function addComponent(string $component, ArrayType|ArrayShapeType $data): void
@@ -20,17 +23,17 @@ class InertiaComponents
             return;
         }
 
-        self::$components[$component] = self::mergeComponentData(
-            self::$components[$component] ?? [],
-            $data,
-        );
+        self::$components[$component] = self::mergeComponentData(self::getComponentData($component), $data);
     }
 
     public static function getComponent(string $component): InertiaResponse
     {
-        $data = self::$components[$component] ?? [];
+        return new InertiaResponse($component, self::getComponentData($component));
+    }
 
-        return new InertiaResponse($component, $data);
+    protected static function getComponentData(string $component): array
+    {
+        return self::$components[$component] ?? [];
     }
 
     protected static function mergeComponentData(array $existingData, ArrayType $data): array

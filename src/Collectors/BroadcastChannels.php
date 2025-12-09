@@ -13,6 +13,9 @@ class BroadcastChannels extends Collector
         //
     }
 
+    /**
+     * @return Collection<string, BroadcastChannel>
+     */
     public function collect(): Collection
     {
         return collect($this->broadcastManager->getChannels())

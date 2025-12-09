@@ -19,20 +19,36 @@ class Models extends Collector
         $this->modelComponents = collect();
     }
 
+    /**
+     * @return Collection<ModelComponent>
+     */
     public function collect(): Collection
     {
-        foreach ($this->findModels() as $model) {
+        $discovered = Discover::in(app_path())
+            ->classes()
+            ->extending(Model::class, User::class, Pivot::class)
+            ->get();
+
+        foreach ($discovered as $model) {
             $this->toComponent($model);
         }
 
         return $this->modelComponents->values();
     }
 
+    /**
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>  $model
+     */
     public function get(string $model): ?ModelComponent
     {
-        return $this->getCollection()->first(fn (ModelComponent $component) => $component->name === $model);
+        return $this->getCollection()->first(
+            fn (ModelComponent $component) => $component->name === $model,
+        );
     }
 
+    /**
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>  $model
+     */
     protected function toComponent(string $model): void
     {
         $result = $this->analyzer->analyzeClass($model)->result();
@@ -62,13 +78,5 @@ class Models extends Collector
         }
 
         $this->modelComponents->offsetSet($modelComponent->name, $modelComponent);
-    }
-
-    protected function findModels()
-    {
-        return Discover::in(app_path())
-            ->classes()
-            ->extending(Model::class, User::class, Pivot::class)
-            ->get();
     }
 }

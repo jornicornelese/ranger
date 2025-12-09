@@ -9,6 +9,9 @@ use Spatie\StructureDiscoverer\Discover;
 
 class Enums extends Collector
 {
+    /**
+     * @return Collection<EnumComponent>
+     */
     public function collect(): Collection
     {
         return collect(Discover::in(app_path())->enums()->get())

@@ -7,6 +7,9 @@ use Laravel\Ranger\Components\EnvironmentVariable;
 
 class EnvironmentVariables extends Collector
 {
+    /**
+     * @return Collection<EnvironmentVariable>
+     */
     public function collect(): Collection
     {
         $envPath = base_path('.env');
