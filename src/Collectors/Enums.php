@@ -14,7 +14,7 @@ class Enums extends Collector
      */
     public function collect(): Collection
     {
-        return collect(Discover::in(app_path())->enums()->get())
+        return collect(Discover::in(...$this->appPaths)->enums()->get())
             ->map($this->toComponent(...));
     }
 

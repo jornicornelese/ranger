@@ -8,6 +8,7 @@ use Illuminate\Routing\Route as BaseRoute;
 use Illuminate\Routing\RouteAction;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Laravel\Ranger\Support\HasPaths;
 use Laravel\Ranger\Support\RouteParameter;
 use Laravel\Ranger\Support\Verb;
 use Laravel\SerializableClosure\Support\ReflectionClosure;
@@ -15,6 +16,8 @@ use ReflectionClass;
 
 class Route
 {
+    use HasPaths;
+
     protected array $possibleResponses = [];
 
     protected ?Validator $requestValidator = null;
@@ -215,7 +218,13 @@ class Route
 
     protected function relativePath(string $path)
     {
-        return str($path)->replace(base_path(), '')->ltrim(DIRECTORY_SEPARATOR)->replace(DIRECTORY_SEPARATOR, '/')->toString();
+        foreach ($this->basePaths as $basePath) {
+            if (str_contains($path, $basePath)) {
+                return str($path)->replace($basePath, '')->ltrim(DIRECTORY_SEPARATOR)->replace(DIRECTORY_SEPARATOR, '/')->toString();
+            }
+        }
+
+        return str($path)->ltrim(DIRECTORY_SEPARATOR)->replace(DIRECTORY_SEPARATOR, '/')->toString();
     }
 
     protected function closure(): Closure

@@ -3,9 +3,12 @@
 namespace Laravel\Ranger;
 
 use Laravel\Ranger\Collectors\Collector;
+use Laravel\Ranger\Support\HasPaths;
 
 class Ranger
 {
+    use HasPaths;
+
     /**
      * @var array<class-string<Collector>, callable[]>
      */
@@ -152,11 +155,17 @@ class Ranger
     public function walk(): void
     {
         foreach ($this->callbacks as $collector => $callbacks) {
-            app($collector)->run($callbacks);
+            app($collector)
+                ->setBasePaths(...$this->basePaths)
+                ->setAppPaths(...$this->appPaths)
+                ->run($callbacks);
         }
 
         foreach ($this->collectionCallbacks as $collector => $callbacks) {
-            app($collector)->runOnCollection($callbacks);
+            app($collector)
+                ->setBasePaths(...$this->basePaths)
+                ->setAppPaths(...$this->appPaths)
+                ->runOnCollection($callbacks);
         }
     }
 

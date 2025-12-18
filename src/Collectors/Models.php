@@ -24,7 +24,7 @@ class Models extends Collector
      */
     public function collect(): Collection
     {
-        $discovered = Discover::in(app_path())
+        $discovered = Discover::in(...$this->appPaths)
             ->classes()
             ->extending(Model::class, User::class, Pivot::class)
             ->get();

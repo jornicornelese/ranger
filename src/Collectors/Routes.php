@@ -7,9 +7,11 @@ use Illuminate\Routing\Route as BaseRoute;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Ranger\Components\Route;
 use ReflectionClass;
 use ReflectionProperty;
+use Spatie\StructureDiscoverer\Discover;
 
 class Routes extends Collector
 {
@@ -34,10 +36,20 @@ class Routes extends Collector
      */
     public function collect(): Collection
     {
+        $this->collectProviderUrlDefaults();
+
         return collect($this->router->getRoutes())
             ->filter($this->filterRoute(...))
             ->map($this->mapToRoute(...))
             ->map($this->resolveResponses(...));
+    }
+
+    protected function collectProviderUrlDefaults(): void
+    {
+        $discovered = Discover::in(...$this->appPaths)
+            ->classes()
+            ->extending(ServiceProvider::class)
+            ->get();
     }
 
     protected function getUrlGeneratorProp(string $prop): mixed
@@ -69,6 +81,8 @@ class Routes extends Collector
             ->flatMap(fn ($r) => $r);
 
         $component = new Route($route, $defaults, $this->forcedScheme, $this->forcedRoot);
+
+        $component->setBasePaths(...$this->basePaths)->setAppPaths(...$this->appPaths);
 
         if ($requestValidator = $this->formRequestCollector->getValidator($route->getAction())) {
             $component->setRequestValidator($requestValidator);

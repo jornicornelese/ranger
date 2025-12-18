@@ -5,6 +5,8 @@ namespace Laravel\Ranger\Collectors;
 use Illuminate\Support\Collection;
 use Laravel\Ranger\Components\EnvironmentVariable;
 
+use function Illuminate\Filesystem\join_paths;
+
 class EnvironmentVariables extends Collector
 {
     /**
@@ -12,18 +14,22 @@ class EnvironmentVariables extends Collector
      */
     public function collect(): Collection
     {
-        $envPath = base_path('.env');
+        foreach ($this->basePaths as $basePath) {
+            $envPath = join_paths($basePath, '.env');
 
-        if (! file_exists($envPath)) {
-            return collect();
+            if (!file_exists($envPath)) {
+                continue;
+            }
+
+            $envFile = file_get_contents($envPath);
+
+            return collect($_ENV)
+                ->filter(fn($_, $key) => preg_match('/^' . $key . '=/m  ', $envFile) === 1)
+                ->map(fn($_, $key) => $this->toComponent($key))
+                ->values();
         }
 
-        $envFile = file_get_contents($envPath);
-
-        return collect($_ENV)
-            ->filter(fn ($_, $key) => preg_match('/^'.$key.'=/m  ', $envFile) === 1)
-            ->map(fn ($_, $key) => $this->toComponent($key))
-            ->values();
+        return collect();
     }
 
     protected function toComponent(string $envKey): EnvironmentVariable

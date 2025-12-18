@@ -3,9 +3,12 @@
 namespace Laravel\Ranger\Collectors;
 
 use Illuminate\Support\Collection;
+use Laravel\Ranger\Support\HasPaths;
 
 abstract class Collector
 {
+    use HasPaths;
+
     protected Collection $cached;
 
     /**

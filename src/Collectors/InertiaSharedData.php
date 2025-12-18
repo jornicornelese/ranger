@@ -22,7 +22,7 @@ class InertiaSharedData extends Collector
      */
     public function collect(): Collection
     {
-        $discovered = Discover::in(app_path())
+        $discovered = Discover::in(...$this->appPaths)
             ->classes()
             ->extending('Inertia\\Middleware')
             ->get();
