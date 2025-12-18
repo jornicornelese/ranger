@@ -21,6 +21,8 @@ class Routes extends Collector
 
     protected $urlDefaults = [];
 
+    protected $universalUrlDefaults = [];
+
     public function __construct(
         protected Router $router,
         protected UrlGenerator $url,
@@ -50,6 +52,14 @@ class Routes extends Collector
             ->classes()
             ->extending(ServiceProvider::class)
             ->get();
+
+        foreach ($discovered as $class) {
+            $this->universalUrlDefaults = array_merge(
+                $this->universalUrlDefaults,
+                $this->getDefaultsFromClassMethod($class, 'register'),
+                $this->getDefaultsFromClassMethod($class, 'boot'),
+            );
+        }
     }
 
     protected function getUrlGeneratorProp(string $prop): mixed
@@ -80,7 +90,7 @@ class Routes extends Collector
             ->map($this->collectMiddlewareDefaults(...))
             ->flatMap(fn ($r) => $r);
 
-        $component = new Route($route, $defaults, $this->forcedScheme, $this->forcedRoot);
+        $component = new Route($route, collect($this->universalUrlDefaults)->merge($defaults), $this->forcedScheme, $this->forcedRoot);
 
         $component->setBasePaths(...$this->basePaths)->setAppPaths(...$this->appPaths);
 
@@ -101,27 +111,27 @@ class Routes extends Collector
             return [];
         }
 
-        return $this->urlDefaults[$middleware] ??= $this->getDefaultsForMiddleware($middleware);
+        return $this->urlDefaults[$middleware] ??= $this->getDefaultsFromClassMethod($middleware, 'handle');
     }
 
-    protected function getDefaultsForMiddleware(string $middleware)
+    protected function getDefaultsFromClassMethod(string $class, string $method)
     {
-        if (! class_exists($middleware)) {
+        if (! class_exists($class)) {
             return [];
         }
 
-        $reflection = new ReflectionClass($middleware);
+        $reflection = new ReflectionClass($class);
 
-        if (! $reflection->hasMethod('handle')) {
+        if (! $reflection->hasMethod($method)) {
             return [];
         }
 
-        $method = $reflection->getMethod('handle');
+        $methodReflection = $reflection->getMethod($method);
 
         // Get the file name and line numbers
-        $fileName = $method->getFileName();
-        $startLine = $method->getStartLine();
-        $endLine = $method->getEndLine();
+        $fileName = $methodReflection->getFileName();
+        $startLine = $methodReflection->getStartLine();
+        $endLine = $methodReflection->getEndLine();
 
         // Read the file and extract the method contents
         $lines = file($fileName);
