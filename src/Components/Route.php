@@ -173,7 +173,7 @@ class Route
         $controller = $this->controller();
 
         if ($controller === '\\Closure') {
-            $path = $this->relativePath((new ReflectionClosure($this->closure()))->getFileName());
+            $path = (new ReflectionClosure($this->closure()))->getFileName();
 
             if (str_contains($path, 'laravel-serializable-closure')) {
                 return '[serialized-closure]';
@@ -186,7 +186,7 @@ class Route
             return '[unknown]';
         }
 
-        return $this->relativePath((new ReflectionClass($controller))->getFileName());
+        return (new ReflectionClass($controller))->getFileName();
     }
 
     protected function resolveUri(): string
