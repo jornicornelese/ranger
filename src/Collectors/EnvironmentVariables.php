@@ -17,15 +17,15 @@ class EnvironmentVariables extends Collector
         foreach ($this->basePaths as $basePath) {
             $envPath = join_paths($basePath, '.env');
 
-            if (!file_exists($envPath)) {
+            if (! file_exists($envPath)) {
                 continue;
             }
 
             $envFile = file_get_contents($envPath);
 
             return collect($_ENV)
-                ->filter(fn($_, $key) => preg_match('/^' . $key . '=/m  ', $envFile) === 1)
-                ->map(fn($_, $key) => $this->toComponent($key))
+                ->filter(fn ($_, $key) => preg_match('/^'.$key.'=/m  ', $envFile) === 1)
+                ->map(fn ($_, $key) => $this->toComponent($key))
                 ->values();
         }
 
