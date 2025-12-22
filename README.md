@@ -70,10 +70,6 @@ $ranger->walk();
 | **Inertia Shared Data**   | Globally shared Inertia.js props                                                                               |
 | **Inertia Components**    | Inertia.js page components with their expected props                                                           |
 
-## Official Documentation
-
-Documentation for Ranger can be found on the [Laravel website](https://laravel.com/docs).
-
 ## Contributing
 
 Thank you for considering contributing to Ranger! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
