@@ -1,6 +1,6 @@
 {
     "name": "laravel/ranger",
-    "description": "Laravel Package ...",
+    "description": "Laravel Ranger is a powerful introspection library for Laravel applications.",
     "keywords": [
         "laravel"
     ],
