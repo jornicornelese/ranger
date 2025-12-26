@@ -117,7 +117,7 @@ class Models extends Collector
         ];
 
         if (in_array($type->value, $collectionRelations)) {
-            return new ArrayType([$relatedModel]);
+            return (new ArrayType([$relatedModel]))->optional();
         }
 
         $maybeCollectionRelation = [
@@ -127,9 +127,9 @@ class Models extends Collector
         ];
 
         if (in_array($type->value, $maybeCollectionRelation)) {
-            return Type::union(new ClassType($type->value), new ArrayType([$relatedModel]));
+            return Type::union(new ClassType($type->value), new ArrayType([$relatedModel]))->nullable()->optional();
         }
 
-        return $relatedModel;
+        return $relatedModel->nullable()->optional();
     }
 }

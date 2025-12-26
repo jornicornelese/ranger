@@ -68,7 +68,7 @@ describe('model relations', function () {
         }
     });
 
-    it('resolves belongsTo relation to the related model class', function () {
+    it('resolves belongsTo relation to a nullable related model class', function () {
         $models = $this->collector->collect();
         $postModel = $models->first(fn (Model $m) => $m->name === Post::class);
 
@@ -77,6 +77,7 @@ describe('model relations', function () {
         expect($relations)->toHaveKey('user');
         expect($relations['user'])->toBeInstanceOf(ClassType::class);
         expect($relations['user']->value)->toBe(User::class);
+        expect($relations['user']->isNullable())->toBeTrue();
     });
 
     it('resolves hasMany relation to an array of the related model', function () {
@@ -91,7 +92,7 @@ describe('model relations', function () {
         expect($relations['posts']->value[0]->value)->toBe(Post::class);
     });
 
-    it('resolves hasOne relation to the related model class', function () {
+    it('resolves hasOne relation to a nullable related model class', function () {
         $models = $this->collector->collect();
         $userModel = $models->first(fn (Model $m) => $m->name === User::class);
 
@@ -100,6 +101,7 @@ describe('model relations', function () {
         expect($relations)->toHaveKey('post');
         expect($relations['post'])->toBeInstanceOf(ClassType::class);
         expect($relations['post']->value)->toBe(Post::class);
+        expect($relations['post']->isNullable())->toBeTrue();
     });
 });
 
