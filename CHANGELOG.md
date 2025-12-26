@@ -1,6 +1,15 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.2...main)
+## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.3...main)
+
+## [v0.1.3](https://github.com/laravel/ranger/compare/v0.1.2...v0.1.3) - 2025-12-26
+
+### What's Changed
+
+* Handle eager loading of models and snake casing by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/laravel/ranger/pull/6
+* Create release script by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/laravel/ranger/pull/7
+
+**Full Changelog**: https://github.com/laravel/ranger/compare/v0.1.2...v0.1.3
 
 ## [v0.1.2](https://github.com/laravel/ranger/compare/v0.1.1...v0.1.2) - 2025-12-26
 
