@@ -2,10 +2,13 @@
 
 namespace Laravel\Ranger\Components;
 
+use Laravel\Ranger\Concerns\HasFilePath;
 use Laravel\Surveyor\Types\Contracts\Type;
 
 class Model
 {
+    use HasFilePath;
+
     /**
      * @var array<string, Type>
      */

@@ -79,6 +79,7 @@ class Models extends Collector
         $modelComponent->setSnakeCaseAttributes($this->shouldSnakeCase($result));
 
         $this->modelComponents->offsetSet($modelComponent->name, $modelComponent);
+        $modelComponent->setFilePath($result->filePath());
 
         foreach ($result->publicProperties() as $property) {
             if ($property->modelAttribute || $property->fromDocBlock) {
