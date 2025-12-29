@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.4...main)
+## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.5...main)
+
+## [v0.1.5](https://github.com/laravel/ranger/compare/v0.1.4...v0.1.5) - 2025-12-29
+
+### What's Changed
+
+* Add file paths to model component by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/laravel/ranger/pull/10
+
+**Full Changelog**: https://github.com/laravel/ranger/compare/v0.1.4...v0.1.5
 
 ## [v0.1.4](https://github.com/laravel/ranger/compare/v0.1.3...v0.1.4) - 2025-12-29
 
