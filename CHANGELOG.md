@@ -1,6 +1,15 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.6...main)
+## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.7...main)
+
+## [v0.1.7](https://github.com/laravel/ranger/compare/v0.1.6...v0.1.7) - 2026-01-12
+
+### What's Changed
+
+* Handle empty Inertia props correctly by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/laravel/ranger/pull/13
+* Strip scheme from forced route URL in route by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/laravel/ranger/pull/14
+
+**Full Changelog**: https://github.com/laravel/ranger/compare/v0.1.6...v0.1.7
 
 ## [v0.1.6](https://github.com/laravel/ranger/compare/v0.1.5...v0.1.6) - 2026-01-06
 
