@@ -43,6 +43,11 @@ class RouteParameter
             return $default;
         }
 
+        if (str_contains($type, 'int')) {
+            // Handle int2, int4, int8, etc.
+            $type = 'int';
+        }
+
         return [Type::from($type)];
     }
 }
