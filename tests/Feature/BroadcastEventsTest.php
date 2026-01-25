@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\PostCreated;
+use App\Events\PostUpdated;
 use App\Events\UserCreated;
 use App\Events\UserUpdated;
 use Laravel\Ranger\Collectors\BroadcastEvents;
@@ -15,7 +16,7 @@ describe('broadcast event collection', function () {
         $events = $this->collector->collect();
 
         expect($events)->not->toBeEmpty();
-        expect($events)->toHaveCount(3);
+        expect($events)->toHaveCount(4);
     });
 
     it('finds UserCreated event', function () {
@@ -24,6 +25,14 @@ describe('broadcast event collection', function () {
 
         expect($userCreated)->not->toBeNull();
         expect($userCreated)->toBeInstanceOf(BroadcastEvent::class);
+    });
+
+    it('finds PostUpdated event (implementing ShouldBroadcastNow)', function () {
+        $events = $this->collector->collect();
+        $postUpdated = $events->first(fn (BroadcastEvent $e) => $e->className === PostUpdated::class);
+
+        expect($postUpdated)->not->toBeNull();
+        expect($postUpdated)->toBeInstanceOf(BroadcastEvent::class);
     });
 
     it('finds UserUpdated event', function () {
