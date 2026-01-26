@@ -3,6 +3,7 @@
 namespace Laravel\Ranger\Collectors;
 
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Support\Collection;
 use Laravel\Ranger\Components\BroadcastEvent;
 use Laravel\Surveyor\Analyzed\ClassResult;
@@ -10,6 +11,7 @@ use Laravel\Surveyor\Analyzer\Analyzer;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\Contracts\Type;
 use Spatie\StructureDiscoverer\Discover;
+use Spatie\StructureDiscoverer\Support\Conditions\ConditionBuilder;
 
 class BroadcastEvents extends Collector
 {
@@ -24,8 +26,10 @@ class BroadcastEvents extends Collector
     public function collect(): Collection
     {
         $discovered = Discover::in(...$this->appPaths)
-            ->classes()
-            ->implementing(ShouldBroadcast::class)
+            ->any(
+                ConditionBuilder::create()->classes()->implementing(ShouldBroadcast::class),
+                ConditionBuilder::create()->classes()->implementing(ShouldBroadcastNow::class),
+            )
             ->get();
 
         return collect($discovered)
