@@ -1,6 +1,23 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.7...main)
+## [Unreleased](https://github.com/laravel/ranger/compare/v0.1.8...main)
+
+## [v0.1.8](https://github.com/laravel/ranger/compare/v0.1.7...v0.1.8) - 2026-01-27
+
+### What's Changed
+
+* Fix error when projects contain UnitEnums. by [@Jasonej](https://github.com/Jasonej) in https://github.com/laravel/ranger/pull/15
+* Fix integer id seen as string by [@mathieutu](https://github.com/mathieutu) in https://github.com/laravel/ranger/pull/16
+* fix(broadcast-events): support ShouldBroadcastNow alongside ShouldBroadcast by [@JorgeRui](https://github.com/JorgeRui) in https://github.com/laravel/ranger/pull/18
+* Fix unit enum case values in Enums collector by [@JorgeRui](https://github.com/JorgeRui) in https://github.com/laravel/ranger/pull/19
+
+### New Contributors
+
+* [@Jasonej](https://github.com/Jasonej) made their first contribution in https://github.com/laravel/ranger/pull/15
+* [@mathieutu](https://github.com/mathieutu) made their first contribution in https://github.com/laravel/ranger/pull/16
+* [@JorgeRui](https://github.com/JorgeRui) made their first contribution in https://github.com/laravel/ranger/pull/18
+
+**Full Changelog**: https://github.com/laravel/ranger/compare/v0.1.7...v0.1.8
 
 ## [v0.1.7](https://github.com/laravel/ranger/compare/v0.1.6...v0.1.7) - 2026-01-12
 
