@@ -3,6 +3,8 @@
 namespace Laravel\Ranger\Collectors;
 
 use Closure;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Laravel\Ranger\Components\JsonResponse;
 use Laravel\Ranger\Support\AnalyzesRoutes;
 use Laravel\Surveyor\Analyzed\MethodResult;
@@ -73,13 +75,47 @@ class Response
             fn ($type) => $type instanceof ClassType && ! $type instanceof InertiaRender,
         );
 
-        $resolvedResponses = array_filter(
-            array_map(fn ($type) => $this->resolveClassType($type), $classResponses),
+        $jsonResponses = array_map(
+            fn ($response) => new JsonResponse($response->value),
+            $responses,
         );
 
-        $allResponses = array_merge($responses, $resolvedResponses);
+        foreach ($classResponses as $classType) {
+            $resolved = $this->resolveClassType($classType);
 
-        return array_map(fn ($response) => new JsonResponse($response->value), $allResponses);
+            if ($resolved === null) {
+                continue;
+            }
+
+            $resourceMeta = $this->getResourceMeta($classType->resolved());
+
+            $jsonResponses[] = new JsonResponse(
+                data: $resolved->value,
+                wrap: $resourceMeta['wrap'],
+                isCollection: $resourceMeta['isCollection'],
+                resourceClass: $resourceMeta['resourceClass'],
+            );
+        }
+
+        return $jsonResponses;
+    }
+
+    /**
+     * @return array{wrap: ?string, isCollection: bool, resourceClass: ?string}
+     */
+    protected function getResourceMeta(string $className): array
+    {
+        $default = ['wrap' => null, 'isCollection' => false, 'resourceClass' => null];
+
+        if (! class_exists($className) || ! is_subclass_of($className, JsonResource::class)) {
+            return $default;
+        }
+
+        return [
+            'wrap' => $className::$wrap,
+            'isCollection' => is_subclass_of($className, ResourceCollection::class),
+            'resourceClass' => $className,
+        ];
     }
 
     protected function resolveClassType(ClassType $classType): ?ArrayType
