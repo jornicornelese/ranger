@@ -6,6 +6,7 @@ use Laravel\Ranger\Components\InertiaResponse;
 use Laravel\Surveyor\Result\VariableState;
 use Laravel\Surveyor\Types\ArrayShapeType;
 use Laravel\Surveyor\Types\ArrayType;
+use Laravel\Surveyor\Types\ClassType;
 use Laravel\Surveyor\Types\CallableType;
 use Laravel\Surveyor\Types\Type;
 use Laravel\Surveyor\Types\UnionType;
@@ -17,9 +18,9 @@ class InertiaComponents
      */
     protected static array $components = [];
 
-    public static function addComponent(string $component, ArrayType|ArrayShapeType $data): void
+    public static function addComponent(string $component, ArrayType|ArrayShapeType|ClassType $data): void
     {
-        $data = $data instanceof ArrayShapeType ? new ArrayType([]) : $data;
+        $data = $data instanceof ArrayShapeType || $data instanceof ClassType ? new ArrayType([]) : $data;
 
         self::$components[$component] = self::mergeComponentData($component, self::getComponentData($component), $data);
     }

@@ -5,6 +5,7 @@ use Laravel\Ranger\Components\InertiaResponse;
 use Laravel\Surveyor\Types\ArrayShapeType;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\BoolType;
+use Laravel\Surveyor\Types\ClassType;
 use Laravel\Surveyor\Types\IntType;
 use Laravel\Surveyor\Types\StringType;
 use Laravel\Surveyor\Types\Type;
@@ -87,6 +88,17 @@ describe('InertiaComponents static class', function () {
 
         // canRegister is only in first route, should be optional
         expect($stats['canRegister']->isOptional())->toBeTrue();
+    });
+
+    it('handles ClassType by creating component with empty data', function () {
+        $data = new ClassType('App\\Some\\Resource');
+        InertiaComponents::addComponent('ResourcePage', $data);
+
+        $component = InertiaComponents::getComponent('ResourcePage');
+
+        expect($component)->toBeInstanceOf(InertiaResponse::class);
+        expect($component->component)->toBe('ResourcePage');
+        expect($component->data)->toBe([]);
     });
 
     it('merges nested array shape props correctly', function () {

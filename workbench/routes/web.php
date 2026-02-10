@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnonymousMiddlewareController;
+use App\Http\Controllers\ApiResourceController;
 use App\Http\Controllers\DisallowedMethodNameController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\InvokableController;
@@ -73,6 +74,10 @@ Route::get('/anonymous-middleware', [AnonymousMiddlewareController::class, 'show
 Route::get('/package-route', function () {
     //
 })->name('my-package::store');
+
+Route::get('/api/user/{user}', [ApiResourceController::class, 'resource'])->name('api.user');
+Route::get('/api/stats', [ApiResourceController::class, 'arrayable'])->name('api.stats');
+Route::get('/api/plain', [ApiResourceController::class, 'plainArray'])->name('api.plain');
 
 Route::prefix('/api/v1')->name('api.v1.')->group(function () {
     Route::get('/tasks', fn () => 'ok')->name('tasks');

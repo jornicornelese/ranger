@@ -3,6 +3,7 @@
 use App\Http\Controllers\InvokableController;
 use App\Http\Controllers\PostController;
 use Laravel\Ranger\Collectors\Routes;
+use Laravel\Ranger\Components\JsonResponse;
 use Laravel\Ranger\Components\Route;
 use Laravel\Ranger\Support\RouteParameter;
 use Laravel\Ranger\Support\Verb;
@@ -263,5 +264,46 @@ describe('dot namespace', function () {
         $postRoute = $this->routes->first(fn (Route $r) => $r->name() === 'posts.index');
 
         expect($postRoute->dotNamespace())->toBe('App.Http.Controllers.PostController');
+    });
+});
+
+describe('API Resource responses', function () {
+    it('resolves JsonResource return types to JsonResponse', function () {
+        $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.user');
+
+        $jsonResponses = array_filter($route->possibleResponses(), fn ($r) => $r instanceof JsonResponse);
+
+        expect($jsonResponses)->not->toBeEmpty();
+
+        $response = array_values($jsonResponses)[0];
+
+        expect($response->data)->toHaveKey('id');
+        expect($response->data)->toHaveKey('name');
+        expect($response->data)->toHaveKey('email');
+    });
+
+    it('resolves Arrayable return types to JsonResponse', function () {
+        $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.stats');
+
+        $jsonResponses = array_filter($route->possibleResponses(), fn ($r) => $r instanceof JsonResponse);
+
+        expect($jsonResponses)->not->toBeEmpty();
+
+        $response = array_values($jsonResponses)[0];
+
+        expect($response->data)->toHaveKey('total_users');
+        expect($response->data)->toHaveKey('active_users');
+    });
+
+    it('still resolves plain array return types to JsonResponse', function () {
+        $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.plain');
+
+        $jsonResponses = array_filter($route->possibleResponses(), fn ($r) => $r instanceof JsonResponse);
+
+        expect($jsonResponses)->not->toBeEmpty();
+
+        $response = array_values($jsonResponses)[0];
+
+        expect($response->data)->toHaveKey('status');
     });
 });
