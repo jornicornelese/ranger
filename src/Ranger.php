@@ -80,6 +80,26 @@ class Ranger
     }
 
     /**
+     * Register a callback to be called when a resource is found.
+     *
+     * @param  callable(\Laravel\Ranger\Components\Resource): void  $callback
+     */
+    public function onResource(callable $callback): void
+    {
+        $this->addCallback(Collectors\Resources::class, $callback);
+    }
+
+    /**
+     * Register a callback to be called when the entire collection of resources is found.
+     *
+     * @param  callable(\Illuminate\Support\Collection<\Laravel\Ranger\Components\Resource>): void  $callback
+     */
+    public function onResources(callable $callback): void
+    {
+        $this->addCollectionCallback(Collectors\Resources::class, $callback);
+    }
+
+    /**
      * Register a callback to be called when a broadcast event is found.
      *
      * @param  callable(\Laravel\Ranger\Components\BroadcastEvent): void  $callback

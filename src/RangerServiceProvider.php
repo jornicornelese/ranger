@@ -7,6 +7,7 @@ use Laravel\Ranger\Collectors\BroadcastChannels;
 use Laravel\Ranger\Collectors\BroadcastEvents;
 use Laravel\Ranger\Collectors\Enums;
 use Laravel\Ranger\Collectors\Models;
+use Laravel\Ranger\Collectors\Resources;
 use Laravel\Ranger\Collectors\Routes;
 
 class RangerServiceProvider extends ServiceProvider
@@ -18,6 +19,7 @@ class RangerServiceProvider extends ServiceProvider
     {
         $this->app->singleton(Enums::class);
         $this->app->singleton(Models::class);
+        $this->app->singleton(Resources::class);
         $this->app->singleton(Routes::class);
         $this->app->singleton(BroadcastChannels::class);
         $this->app->singleton(BroadcastEvents::class);

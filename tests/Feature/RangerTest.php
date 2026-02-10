@@ -6,6 +6,7 @@ use Laravel\Ranger\Components\BroadcastChannel;
 use Laravel\Ranger\Components\BroadcastEvent;
 use Laravel\Ranger\Components\Enum;
 use Laravel\Ranger\Components\Model;
+use Laravel\Ranger\Components\Resource;
 use Laravel\Ranger\Components\Route;
 use Laravel\Ranger\Ranger;
 
@@ -195,6 +196,36 @@ describe('broadcast channel callbacks', function () {
         $this->ranger->walk();
 
         expect($receivedCollection)->toBeInstanceOf(Collection::class);
+    });
+});
+
+describe('resource callbacks', function () {
+    it('registers onResource callback', function () {
+        $called = false;
+        $receivedResource = null;
+
+        $this->ranger->onResource(function (Resource $resource) use (&$called, &$receivedResource) {
+            $called = true;
+            $receivedResource = $resource;
+        });
+
+        $this->ranger->walk();
+
+        expect($called)->toBeTrue();
+        expect($receivedResource)->toBeInstanceOf(Resource::class);
+    });
+
+    it('registers onResources collection callback', function () {
+        $receivedCollection = null;
+
+        $this->ranger->onResources(function (Collection $resources) use (&$receivedCollection) {
+            $receivedCollection = $resources;
+        });
+
+        $this->ranger->walk();
+
+        expect($receivedCollection)->toBeInstanceOf(Collection::class);
+        expect($receivedCollection)->not->toBeEmpty();
     });
 });
 
