@@ -3,6 +3,7 @@
 namespace Laravel\Ranger\Collectors;
 
 use Closure;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Laravel\Ranger\Components\JsonResponse;
@@ -12,7 +13,9 @@ use Laravel\Surveyor\Analyzer\Analyzer;
 use Laravel\Surveyor\Types\ArrayType;
 use Laravel\Surveyor\Types\ClassType;
 use Laravel\Surveyor\Types\Contracts\MultiType;
+use Laravel\Surveyor\Types\Contracts\Type as TypeContract;
 use Laravel\Surveyor\Types\Entities\InertiaRender;
+use Laravel\Surveyor\Types\Entities\ResourceResponse;
 
 class Response
 {
@@ -81,6 +84,26 @@ class Response
         );
 
         foreach ($classResponses as $classType) {
+            if ($classType instanceof ResourceResponse) {
+                $resolved = $this->resolveClassType(new ClassType($classType->resourceClass));
+
+                if ($resolved === null) {
+                    continue;
+                }
+
+                $resourceMeta = $this->getResourceMeta($classType->resourceClass);
+
+                $jsonResponses[] = new JsonResponse(
+                    data: $resolved->value,
+                    wrap: $resourceMeta['wrap'],
+                    isCollection: $classType->isCollection,
+                    resourceClass: $classType->resourceClass,
+                    isPaginated: $classType->isCollection && $this->isPaginator($classType->wrappedData),
+                );
+
+                continue;
+            }
+
             $resolved = $this->resolveClassType($classType);
 
             if ($resolved === null) {
@@ -116,6 +139,17 @@ class Response
             'isCollection' => is_subclass_of($className, ResourceCollection::class),
             'resourceClass' => $className,
         ];
+    }
+
+    protected function isPaginator(TypeContract $type): bool
+    {
+        if (! $type instanceof ClassType) {
+            return false;
+        }
+
+        $resolved = $type->resolved();
+
+        return class_exists($resolved) && is_subclass_of($resolved, Paginator::class);
     }
 
     protected function resolveClassType(ClassType $classType): ?ArrayType

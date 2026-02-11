@@ -9,6 +9,7 @@ class JsonResponse
         public readonly ?string $wrap = null,
         public readonly bool $isCollection = false,
         public readonly ?string $resourceClass = null,
+        public readonly bool $isPaginated = false,
     ) {
         //
     }

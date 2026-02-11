@@ -76,6 +76,8 @@ Route::get('/package-route', function () {
 })->name('my-package::store');
 
 Route::get('/api/user/{user}', [ApiResourceController::class, 'resource'])->name('api.user');
+Route::get('/api/users', [ApiResourceController::class, 'collection'])->name('api.users');
+Route::get('/api/users/paginated', [ApiResourceController::class, 'paginated'])->name('api.users.paginated');
 Route::get('/api/stats', [ApiResourceController::class, 'arrayable'])->name('api.stats');
 Route::get('/api/plain', [ApiResourceController::class, 'plainArray'])->name('api.plain');
 

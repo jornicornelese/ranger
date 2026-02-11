@@ -295,6 +295,40 @@ describe('API Resource responses', function () {
         expect($response->data)->toHaveKey('active_users');
     });
 
+    it('resolves resource collection return types to JsonResponse with isCollection flag', function () {
+        $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.users');
+
+        $jsonResponses = array_filter($route->possibleResponses(), fn ($r) => $r instanceof JsonResponse);
+
+        expect($jsonResponses)->not->toBeEmpty();
+
+        $response = array_values($jsonResponses)[0];
+
+        expect($response->isCollection)->toBeTrue();
+        expect($response->isPaginated)->toBeFalse();
+        expect($response->resourceClass)->toBe(\App\Http\Resources\UserResource::class);
+        expect($response->data)->toHaveKey('id');
+        expect($response->data)->toHaveKey('name');
+        expect($response->data)->toHaveKey('email');
+    });
+
+    it('resolves paginated resource collection return types to JsonResponse with isPaginated flag', function () {
+        $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.users.paginated');
+
+        $jsonResponses = array_filter($route->possibleResponses(), fn ($r) => $r instanceof JsonResponse);
+
+        expect($jsonResponses)->not->toBeEmpty();
+
+        $response = array_values($jsonResponses)[0];
+
+        expect($response->isCollection)->toBeTrue();
+        expect($response->isPaginated)->toBeTrue();
+        expect($response->resourceClass)->toBe(\App\Http\Resources\UserResource::class);
+        expect($response->data)->toHaveKey('id');
+        expect($response->data)->toHaveKey('name');
+        expect($response->data)->toHaveKey('email');
+    });
+
     it('still resolves plain array return types to JsonResponse', function () {
         $route = $this->routes->first(fn (Route $r) => $r->name() === 'api.plain');
 
